@@ -11,7 +11,7 @@
 
 
 % =========================================================================
-% 1.1  MOTIVATION
+% 1.1  HEDGING UNDER NON-UNIQUENESS OF MARTINGALE MEASURES
 % =========================================================================
 \subsection{Hedging Under Non-Uniqueness of Martingale Measures}
 \label{subsec:hedging_motivation}
@@ -21,54 +21,46 @@ frictionless market with continuous trading, the price of a contingent
 claim is determined by an arbitrage argument rather than by the
 preferences of individual agents.  In the setting of
 \citet{BlackScholes1973} and \citet{Merton1973}, a single risky asset
-follows geometric Brownian motion with constant volatility~$\sigma$, and a
-risk-free bond grows at a constant rate~$r$.  Under these assumptions,
-every European option payoff can be exactly replicated by dynamically
-adjusting the stock position according to an explicit formula, the
-celebrated delta hedge.  The cost of constructing the replicating
-portfolio at any given time is unique: it equals the discounted expectation
-of the payoff under the sole probability measure that makes discounted
-prices into martingales.
+follows geometric Brownian motion with constant volatility~$\sigma$, and
+every European option payoff can be exactly replicated by a dynamically
+adjusted portfolio.  The cost of this replicating portfolio is unique: it
+equals the discounted expectation of the payoff under the sole probability
+measure that makes discounted prices into martingales.
 
-The mathematical foundation of this result is provided by the
-{fundamental theorems of asset pricing}.  The first theorem,
-established in full generality by \citet{DelbaenSchachermayer1994},
-states that a market satisfies {no free lunch with vanishing risk}
-(NFLVR) if and only if there exists at least one probability measure
-$\mathbb{Q}$, equivalent to the physical measure~$\mathbb{P}$, under
-which discounted asset prices are local martingales.  Any such measure is
-called an {equivalent local martingale measure}, and the set of all
-such measures is denoted $\mathcal{M}(X)$.  The second theorem, due to
-\citet{HarrisonPliska1981} and \citet{HarrisonKreps1979}, characterises
-market completeness: every contingent claim can be replicated by a
-self-financing trading strategy if and only if $\mathcal{M}(X)$ contains
-exactly one element.  When $|\mathcal{M}(X)| = 1$, the unique
-measure~$\mathbb{Q}$ assigns a unique price to every claim, and the
-{martingale representation theorem} guarantees the existence of a
-replicating strategy whose gains-from-trade process equals the conditional
-expectation of the payoff.
+The mathematical foundation is provided by the fundamental theorems of
+asset pricing.  The first theorem \citep{DelbaenSchachermayer1994} states
+that a market satisfies \text{no free lunch with vanishing risk} (NFLVR)
+if and only if there exists at least one probability measure
+$\mathbb{Q} \sim \mathbb{P}$ under which discounted asset prices are local
+martingales.  The set of all such 
+\text{equivalent local martingale
+measures} is denoted~$\mathcal{M}(X)$.  Financially, each measure
+$\mathbb{Q} \in \mathcal{M}(X)$ represents one consistent way of
+assigning prices to uncertain future payoffs: it re-weights the likelihood
+of different market scenarios so that, on average, discounted asset prices
+neither rise nor fall.  The second theorem
+\citep{HarrisonPliska1981, HarrisonKreps1979} characterises market
+completeness: every contingent claim can be replicated if and only if
+$|\mathcal{M}(X)| = 1$.  When a unique measure exists, every derivative
+has exactly one arbitrage-free price, and a trading strategy that
+perfectly reproduces the payoff can be constructed.
 
-The structural issue that motivates this thesis is the failure of
-uniqueness.  In practice, the assumptions underpinning the complete-market
-paradigm are systematically violated.  Volatility is not constant: it
-evolves randomly over time, as documented by the implied volatility
-surface observed in options markets and formalised in stochastic volatility
-models such as that of \citet{Heston1993}.  Asset prices exhibit jumps
-driven by macroeconomic announcements or liquidity shocks
-\citep{Merton1976}.  Transaction costs prevent the continuous rebalancing
-that perfect replication requires \citep{LelandReplication1985}.  In
-multi-asset settings, portfolios may be exposed to correlated risk factors
-that are not individually tradable.  Each of these features introduces
-sources of randomness that cannot be offset by the available instruments,
-rendering the market {incomplete}.
+The structural issue that motivates this thesis is the failure of this
+uniqueness.  In practice, volatility evolves randomly over time
+\citep{Heston1993}, asset prices exhibit jumps \citep{Merton1976}, and
+transaction costs prevent continuous rebalancing
+\citep{LelandReplication1985}.  In multi-asset settings, portfolios may be
+exposed to correlated risk factors that are not individually tradable.
+Each of these features introduces sources of randomness that cannot be
+offset by the available instruments, rendering the market
+\text{incomplete}: $|\mathcal{M}(X)| > 1$.  Intuitively, an incomplete
+market is one in which there are more sources of risk than there are
+instruments to trade them away, so that perfect replication of a general
+payoff is impossible.
 
-When the market is incomplete, $\mathcal{M}(X)$ contains more than one
-element.  Different measures in $\mathcal{M}(X)$ assign different prices
-to the same non-replicable claim, and no single trading strategy can
-eliminate the hedging error.  Rather than a unique price, one obtains an
-interval of arbitrage-consistent values.  Let $H \ge 0$ denote the
-discounted payoff of a European claim at maturity~$T$.  The
-{arbitrage-free price interval} is
+When the market is incomplete, different measures in~$\mathcal{M}(X)$
+assign different prices to the same non-replicable claim.  Rather than a
+unique price, one obtains the arbitrage-free price interval
 \begin{equation}
 \label{eq:price_interval}
 \Bigl[\,
@@ -79,54 +71,58 @@ discounted payoff of a European claim at maturity~$T$.  The
 \end{equation}
 Any price within this interval is consistent with the absence of
 arbitrage; any price outside it creates a free lunch
-\citep{DelbaenSchachermayer1994}.  The {upper bound},
-$\pi(H) = \sup_{\mathbb{Q} \in \mathcal{M}(X)}
-\mathbb{E}^{\mathbb{Q}}[H]$, has a direct financial interpretation
-grounded in martingale duality: it equals the minimal initial capital
-required to construct an adapted, non-negative wealth process that
-dominates~$H$ almost surely at maturity~$T$.  This is the
-{minimal dominating price}.  In a complete market, the interval
-degenerates to a single point and the dominating strategy reduces to the
-familiar replicating portfolio with no residual cost.
+\citep{DelbaenSchachermayer1994}.  Financially, the interval represents
+the range of prices at which neither the buyer nor the seller can extract a
+risk-free profit: each measure~$\mathbb{Q}$ yields a different but
+legitimate valuation, and the market provides no mechanism to select among
+them.  The upper bound
+$\pi(H) := \sup_{\mathbb{Q} \in \mathcal{M}(X)}
+\mathbb{E}^{\mathbb{Q}}[H]$ has a direct financial interpretation grounded
+in martingale duality: it equals the minimal initial capital required to
+construct an admissible wealth process that dominates~$H$ almost surely at
+maturity.  In other words, it is the cheapest amount of money a seller
+must hold today to guarantee that, by trading in the available assets, the
+portfolio will cover the payoff regardless of which scenario materialises.
+This is the \text{super-hedging price}.  In a complete market, the
+interval degenerates to a single point because only one pricing measure
+exists; computationally, this means a single expectation suffices.  In an
+incomplete market, computing the upper bound requires an optimisation over
+the entire set~$\mathcal{M}(X)$, which is generally infinite-dimensional.
 
-American options introduce an additional layer of complexity through
-optimal stopping.  Unlike European claims, which are exercised only at
-maturity, an American option may be exercised by the holder at any stopping
-time $\tau \le T$.  The seller's hedge must remain adequate regardless of
-when the holder exercises.  This couples the hedging problem with an
-optimal stopping problem: the value to the seller must account
-simultaneously for the worst-case choice of pricing measure {and}
-the worst-case exercise policy.  The minimal dominating price becomes a
-nested essential supremum over both sources of adversarial choice:
+American options compound this difficulty through optimal stopping.  The
+holder may exercise at any stopping time $\tau \le T$, and the seller's
+hedge must remain adequate regardless of when exercise occurs.  The hedging
+problem is therefore coupled to an optimal stopping problem, and the
+minimal dominating price acquires a minimax structure:
 \begin{equation}
 \label{eq:american_price_intro}
 \pi(\xi)
-\;=\;
+\;:=\;
 \sup_{\mathbb{Q} \in \mathcal{M}(X)}
 \;\sup_{\tau \in \mathcal{T}_{[0,T]}}
 \;\mathbb{E}^{\mathbb{Q}}[\xi_\tau],
 \end{equation}
-where $\xi = (\xi_t)_{t \in [0,T]}$ is the discounted reward process of
-the American option and $\mathcal{T}_{[0,T]}$ is the set of stopping times
-valued in $[0,T]$.  In complete markets, the outer supremum is trivial and
-the problem reduces to the classical Snell envelope construction of
-\citet{Bensoussan1984} and \citet{Karatzas1988}.  In incomplete markets,
-both suprema are non-trivial and their interaction creates a substantially
-harder problem with a minimax structure.
+where $\xi := (\xi_t)_{t \in [0,T]}$ is the discounted reward process and
+$\mathcal{T}_{[0,T]}$ is the set of stopping times valued in~$[0,T]$.
+The nested supremum creates a two-player adversarial structure: the outer
+supremum searches over all consistent pricing models (choosing the
+worst-case measure), while the inner supremum searches over all possible
+exercise times (choosing the worst-case exercise for the seller).  The
+seller must be prepared for the worst combination of both.  In complete
+markets, the outer supremum is trivial (there is only one measure) and the
+problem reduces to the classical Snell envelope
+\citep{Bensoussan1984, Karatzas1988}, a single optimal stopping problem.
+In incomplete markets, both suprema are non-trivial: the seller faces
+adversarial choice over both the pricing measure and the exercise policy,
+making the problem substantially harder.  Computationally, this means that
+any numerical method must handle the interaction of two coupled
+optimisation layers, which rules out straightforward dynamic programming
+unless the model has special structure.
 
-The central object of this thesis is the {minimal dominating wealth
+The central object of this thesis is the \text{minimal dominating wealth
 process} under non-unique martingale measures: the adapted process that
-tracks the value~\eqref{eq:american_price_intro} dynamically through time,
-together with the trading strategy that generates it.  The thesis does not
-introduce new pricing theory or new representation results; rather, it
-investigates this object computationally using established deep learning
-methods, and interprets the results through the lens of existing
-martingale duality results from mathematical finance.  The non-uniqueness
-of martingale measures creates a pricing interval whose upper bound defines
-the minimal dominating price, and American options compound the difficulty
-through the interaction of model ambiguity with optimal stopping.  The
-precise mathematical formulation of the problem is the subject of the next
-section.
+tracks this value dynamically through time, together with the trading
+strategy that generates it.
 
 
 % =========================================================================
@@ -136,24 +132,28 @@ section.
 \label{subsec:math_formulation}
 
 Let $(\Omega, \mathcal{F},
-\mathbb{F} = (\mathcal{F}_t)_{t \ge 0}, \mathbb{P})$ be a filtered
+\mathbb{F} := (\mathcal{F}_t)_{t \ge 0}, \mathbb{P})$ be a filtered
 probability space satisfying the usual conditions of right-continuity and
-completeness.  The space supports $d = 2$ traded risky assets with
-discounted price process $X := (X^1, X^2)$, assumed to be a locally
-bounded, càdlàg (right-continuous with left limits) semimartingale.  Let
-$\mathcal{M}(X)$ denote the set of all probability measures
-$\mathbb{Q} \sim \mathbb{P}$ under which $X$ is a local martingale.  By
-the first fundamental theorem of asset pricing
-\citep{DelbaenSchachermayer1994}, the absence of arbitrage (NFLVR) is
-equivalent to $\mathcal{M}(X) \neq \emptyset$.  The market is assumed to
-be incomplete: $|\mathcal{M}(X)| > 1$, reflecting the presence of
-$m > d = 2$ independent sources of randomness that cannot all be hedged by
-trading in the two assets.
+completeness.  The filtration $\mathbb{F}$ represents the information
+available to the hedger at each point in time: $\mathcal{F}_t$ contains
+everything that has been observed up to and including time~$t$.  The space
+supports $d := 2$ traded risky assets with discounted price process
+$X := (X^1, X^2)$, assumed to be a locally bounded, c\`{a}dl\`{a}g
+(right-continuous with left limits) semimartingale.  Let $\mathcal{M}(X)$
+denote the set of all probability measures $\mathbb{Q} \sim \mathbb{P}$
+under which~$X$ is a local martingale.  The market is assumed to be
+incomplete: $|\mathcal{M}(X)| > 1$, reflecting the presence of
+$m > d := 2$ independent sources of randomness.  In the models considered
+in this thesis, there are two traded assets but three or more independent
+Brownian motions driving the system, so that perfect hedging is impossible.
 
-A {trading strategy} is a predictable, $X$-integrable process
+A \text{trading strategy} is a predictable, $X$-integrable process
 $\varphi := (\varphi^1, \varphi^2)$ representing the number of units of
-each asset held at each time.  Given an initial capital $v \ge 0$ and a
-trading strategy~$\varphi$, the {wealth process} is
+each asset held at each time.  Predictability means that the portfolio
+position at time~$t$ is determined using only information available
+strictly before~$t$: the hedger must decide how much of each asset to hold
+\text{before} observing the next price movement.  Given initial
+capital $v \ge 0$ and strategy~$\varphi$, the \text{wealth process} is
 \begin{equation}
 \label{eq:wealth_process}
 V_t
@@ -161,40 +161,53 @@ V_t
 \qquad t \ge 0,
 \end{equation}
 where $\int_0^t \varphi_s \, dX_s$ represents the cumulative gains from
-trade and $C = (C_t)_{t \ge 0}$ is an adapted, non-decreasing process
-with $C_0 = 0$.  When $C \equiv 0$, the strategy is {self-financing}:
-changes in wealth are driven solely by changes in asset prices.  When
-$C$ is strictly increasing, the strategy requires the hedger to absorb a
-cumulative cost that arises because the market does not offer enough
-instruments to track the obligation perfectly.  Following \citet{Kramkov1996},
-the strategy is called {admissible} if $V_t \ge 0$ for all $t \ge 0$.
+trade and $C := (C_t)_{t \ge 0}$ is an adapted, non-decreasing process
+with $C_0 := 0$.  Financially, the integral $\int_0^t \varphi_s \, dX_s$
+is the total profit or loss from holding the portfolio: it accumulates the
+gains and losses from each small price movement, weighted by the number of
+shares held.  The process~$C$ records the cumulative cost that arises
+because the market does not offer enough instruments to track the
+obligation perfectly.  When $C \equiv 0$, the strategy is self-financing:
+changes in wealth are driven solely by changes in asset prices, and no
+external cash injection is needed.  When $C$ is strictly increasing, the
+hedger must absorb a running cost, reflecting the irreducible price of
+operating in an incomplete market.  The strategy is \text{admissible} if
+$V_t \ge 0$ for all $t \ge 0$ \citep{Kramkov1996}; this rules out
+strategies that borrow indefinitely.
 
 The American put option with strike~$K$ and maturity~$T$ on asset~$i$
 generates a discounted reward process
 \begin{equation}
 \label{eq:american_reward}
 \xi_t \;:=\; e^{-rt}\max(K - S^i_t,\, 0),
-\qquad t \in [0, T],
+\qquad t \in [0, T].
 \end{equation}
-that the holder may exercise at any stopping time $\tau \le T$.  An
-admissible strategy with wealth $V_t \ge \xi_t$ for all
-$t \in [0,T]$ is called a {dominating strategy} for~$\xi$.  The
-{minimal dominating value process} is
+This is the payoff the holder would receive if exercising at time~$t$,
+discounted back to time zero.  An admissible strategy with
+$V_t \ge \xi_t$ for all $t \in [0,T]$ is a \text{dominating strategy}
+for~$\xi$: the portfolio value always exceeds the option obligation, so
+the seller can meet the claim no matter when the holder exercises.  The
+\text{minimal dominating value process} is
 \begin{equation}
 \label{eq:value_process}
 \tilde{V}_t
 \;:=\;
 \esssup_{\mathbb{Q} \in \mathcal{M}(X)}
 \;\esssup_{\tau \in \mathcal{T}_{[t,T]}}
-\;\mathbb{E}^{\mathbb{Q}}[\xi_\tau \mid \mathcal{F}_t],
+\;\mathbb{E}^{\mathbb{Q}}[\xi_\tau \mid \mathcal{F}_t].
 \end{equation}
-where $\mathcal{T}_{[t,T]}$ is the set of $\mathbb{F}$-stopping times
-valued in $[t,T]$.  At time zero, $\tilde{V}_0$ reduces to the minimal
-dominating price~\eqref{eq:american_price_intro}.
+The essential supremum ($\esssup$) is the measure-theoretic analogue of a
+pointwise maximum: it selects the largest value across all pricing measures
+and all stopping times, subject to the information available at time~$t$.
+Intuitively, $\tilde{V}_t$ is the smallest amount of wealth that the
+seller must hold at time~$t$ to guarantee coverage of the American option
+from that point onward, accounting for the worst-case pricing model and
+the worst-case exercise time.  At time zero, $\tilde{V}_0$ reduces to the
+minimal dominating price~$\pi(\xi)$.
 
-Under appropriate integrability conditions, the {optional
-decomposition theorem} of \citet{Kramkov1996} guarantees that the process
-$\tilde{V}$ admits the representation
+Under appropriate integrability conditions, the \text{optional
+decomposition theorem} \citep{Kramkov1996} guarantees that~$\tilde{V}$
+admits the representation
 \begin{equation}
 \label{eq:optional_decomp}
 \tilde{V}_t
@@ -204,184 +217,155 @@ $\tilde{V}$ admits the representation
 \qquad t \ge 0,
 \end{equation}
 where $\tilde{\varphi}$ is a predictable, $X$-integrable process and
-$\tilde{C}$ is an adapted, non-decreasing, càdlàg process with
-$\tilde{C}_0 = 0$.  The decomposition is called {optional} because
-$\tilde{C}$ is $\mathcal{F}_t$-measurable at each time~$t$ but not
-necessarily $\mathcal{F}_{t^-}$-measurable, in contrast to the classical
-Doob--Meyer decomposition in which the increasing process is
-{predictable} \citep{KaratzasShreve1991}.  In a complete market,
-$\tilde{C} \equiv 0$ and the decomposition reduces to a self-financing
-replication.  In an incomplete market, $\tilde{C}$ is strictly increasing
-and measures the irreducible cost of the gap between the instruments
-available and the risks to be managed.  The full statement and financial
-interpretation of the optional decomposition theorem are presented in
-Chapter~2.
+$\tilde{C}$ is an adapted, non-decreasing, c\`{a}dl\`{a}g process with
+$\tilde{C}_0 := 0$.  This theorem is the cornerstone of the thesis and
+merits careful interpretation.  It states three things.  \text{First},
+the minimal dominating value can be decomposed into a starting capital
+$\tilde{V}_0$, a gains-from-trade component
+$\int_0^t \tilde{\varphi}_s \, dX_s$, and a cost
+component~$\tilde{C}_t$.  \text{Second}, the trading
+strategy~$\tilde{\varphi}$ is predictable, meaning it can be determined
+before observing the current price movement.  \text{Third}, the cost
+process~$\tilde{C}$ is only \text{adapted}: its value at time~$t$ may
+depend on information revealed at~$t$ itself, not merely on information
+available before~$t$.  This is why the decomposition is called
+\text{optional} rather than \text{predictable}, in contrast to the
+classical Doob--Meyer decomposition in which the increasing process is
+predictable \citep{KaratzasShreve1991}.
 
-The theorem is {existential}.  It guarantees the existence of the
-predictable integrand~$\tilde{\varphi}$ and the adapted cost
-process~$\tilde{C}$, but it does not provide a constructive algorithm for
-computing either object.  In any concrete setting with stochastic
-volatility, multiple assets, or early-exercise features, one must resort
-to numerical methods.  This gap between the existence guarantee and the
-need for a computable solution defines the problem addressed in this
-thesis: to approximate the integrand~$\tilde{\varphi}$ using established
-neural network methods, and to interpret the residual hedging error as an
-empirical estimate of the cost process~$\tilde{C}$.
+Financially, the decomposition separates two fundamentally different
+components of the hedging problem.  The integral
+$\int_0^t \tilde{\varphi}_s \, dX_s$ captures the part of the value
+process that \text{can} be generated by trading: it is what the hedger
+earns through skilful portfolio management.  The process~$\tilde{C}_t$
+captures the part that \text{cannot} be generated by trading: it is the
+cumulative cost of operating in an incomplete market, the price paid for
+the fact that the available instruments do not span all sources of risk.
+In a complete market, $\tilde{C} \equiv 0$ and the decomposition reduces
+to self-financing replication: the entire value process is generated by
+trading alone.  In an incomplete market, $\tilde{C}$ is strictly
+increasing and measures the irreducible cost of the gap between available
+instruments and the risks to be managed.
+
+The distinction between predictable and adapted is central to this thesis
+and has a direct computational consequence.  The
+integrand~$\tilde{\varphi}$ is predictable: the hedger's portfolio
+position at time~$t$ depends only on information available strictly
+before~$t$.  The cost process~$\tilde{C}$ is adapted but generally not
+predictable: its value at time~$t$ may depend on information revealed
+at~$t$ itself, such as a sudden volatility shock or an unexpected
+correlation change.  A neural network that maps the current market state to
+a portfolio position at each rebalancing date is, by construction, an
+estimator of the predictable integrand~$\tilde{\varphi}$: it produces a
+trading decision based on information available at the time the decision is
+made.  The residual hedging error --- the gap between the trained portfolio
+value and the option obligation --- captures the component of the value
+process that the predictable strategy cannot reach.  This residual serves
+as the empirical proxy for the adapted cost process~$\tilde{C}$.
+Computationally, the trained neural network separates the hedging problem
+into its learnable part (the strategy~$\tilde{\varphi}$, parameterised by
+network weights) and its irreducible part (the cost~$\tilde{C}$, observed
+in the residual).
+
+The theorem is \text{existential}.  It guarantees the existence
+of~$\tilde{\varphi}$ and~$\tilde{C}$ but provides no constructive
+algorithm for computing either.  It tells us that an optimal predictable
+strategy exists and that the remaining cost is adapted, but it does not
+tell us what the strategy looks like in any specific model.  This gap
+between the existence guarantee and the need for a computable solution
+defines the problem addressed in this thesis: to approximate~$\tilde{\varphi}$
+using established neural network methods, and to interpret the residual
+hedging error as an empirical estimate of~$\tilde{C}$.
 
 
 % =========================================================================
-% 1.3  COMPUTATIONAL CHALLENGE
+% 1.3  COMPUTATIONAL CHALLENGE AND RESEARCH GAP
 % =========================================================================
-\subsection{Computational Challenge}
+\subsection{Computational Challenge and Research Gap}
 \label{subsec:computational_challenge}
 
-The optional decomposition~\eqref{eq:optional_decomp} identifies the
-structural target, a predictable integrand and an adapted cost process,
-but its computation in concrete settings requires solving
+Computing the optional decomposition in concrete settings requires solving
 high-dimensional, path-dependent optimisation problems for which no
-closed-form solutions are available.  This section reviews the principal
-classes of numerical methods, explains their limitations, and motivates
-the adoption of established deep learning approaches.
+closed-form solutions exist.  Classical PDE methods apply when the price
+process is Markovian and low-dimensional, but scale poorly with the number
+of state variables: in the two-asset Heston model considered here, the
+state space is at least four-dimensional (two asset prices and two
+variance processes), and grid-based methods become impractical
+\citep{Glasserman2003}.  Moreover, PDE-based value functions depend on the
+choice of pricing measure, and no single PDE characterises the minimal
+dominating value process without additional structural information
+about~$\mathcal{M}(X)$.  Regression-based Monte Carlo methods, notably the
+Longstaff--Schwartz algorithm \citep{LongstaffSchwartz2001}, address
+optimal stopping but do not directly yield hedging strategies and do not
+account for model ambiguity in incomplete markets.
 
-\subsubsection{Classical PDE Methods}
+Deep learning methods offer alternatives that bypass these limitations.
+Two fundamentally different approaches are relevant, distinguished by
+whether they solve the problem \text{backward} or \text{forward} in
+time.
 
-When the price process is Markovian and low-dimensional, the value
-process~\eqref{eq:value_process} satisfies a partial differential equation
-(PDE) or, for American options, a free-boundary problem.  For the
-Black--Scholes model with a single asset, the American put price satisfies
-a well-studied complementarity problem that can be solved by finite
-differences or front-fixing methods \citep{Wilmott1995}.  However, these
-methods scale poorly with the number of state variables.  In the two-asset
-Heston model considered in this thesis, the state space is at least
-four-dimensional (two asset prices and two variance processes), and the
-PDE becomes a system of coupled equations on a high-dimensional grid.
-Storage and computation costs grow exponentially with dimension, the
-well-known ``curse of dimensionality,'' making grid-based methods
-impractical for all but the simplest multi-asset settings
-\citep{Glasserman2003}.
-
-Moreover, PDE methods yield the value function and its derivatives (the
-Greeks), from which the hedging strategy can be extracted.  But when the
-market is incomplete, the value function depends on the choice of pricing
-measure, and no single PDE characterises the minimal dominating value
-process without additional information about the structure
-of~$\mathcal{M}(X)$.  This model-dependence is a fundamental limitation
-that persists even when the dimensionality is manageable.
-
-\subsubsection{Regression-Based Monte Carlo Methods}
-
-Monte Carlo simulation handles high-dimensional problems naturally, since
-its convergence rate is independent of the number of state variables.  For
-American options, the key difficulty is that the optimal exercise boundary
-is not known in advance and must be estimated from the simulated paths
-themselves.  The {Longstaff--Schwartz algorithm}
-\citep{LongstaffSchwartz2001} addresses this by regressing the
-continuation value onto a set of basis functions of the current state at
-each time step, proceeding backwards from maturity.  The
-{Tsitsiklis--Van~Roy} algorithm \citep{TsitsiklisVanRoy2001}
-provides a closely related approach with convergence guarantees.
-
-These regression-based methods are widely used in practice and serve as
-important baselines.  Their principal limitation is the choice of basis
-functions: in high-dimensional or path-dependent settings, it is difficult
-to select a set of regressors that is both computationally tractable and
-expressive enough to capture the continuation value accurately.
-Furthermore, the regression step provides an approximation of the
-{optimal stopping rule} but does not directly yield an optimal
-{hedging strategy}: a separate computation is needed to determine
-the portfolio positions along each path.  In incomplete markets, the
-additional challenge of accounting for model ambiguity across
-$\mathcal{M}(X)$ is not naturally addressed by these methods.
-
-\subsubsection{Deep Hedging}
-
-The {deep hedging} approach of
-\citet{BuehlerGononTeichmannWood2019} takes a fundamentally different
-route.  Rather than solving for the value function and then extracting a
-strategy, it parameterises the trading strategy directly as a neural
-network and trains it end-to-end by minimising a risk functional applied to
-the distribution of hedging errors.  At each rebalancing date, the network
-maps the current market state (asset prices, time to maturity, and any
-auxiliary features) to a portfolio position.  A large batch of price
-paths is simulated, the strategy is applied along each path, and the
-terminal hedging error is evaluated.  The network weights are updated by
-stochastic gradient descent through the entire trading sequence.
-
-Deep hedging is model-agnostic: it does not require analytic pricing
-formulas, and transaction costs, position limits, and non-standard payoffs
-can be incorporated within the same optimisation.
-\citet{BuehlerGononTeichmannWood2019} proposed two primary architectures:
-a feedforward network applied at each time step, and a recurrent network
-that maintains a hidden state encoding the path history.
-\citet{Horvath2021} introduced path signatures as input features,
-replacing hand-crafted features with a systematic mathematical
-representation of path information.  The literature review in Chapter~2
-surveys the subsequent extensions in detail, including transformer
-architectures \citep{Cao2023} and reinforcement learning formulations
-\citep{CaoChenVorobeychikMadan2023}.
-
-\subsubsection{Deep BSDE Solvers}
-
-An alternative computational approach, and the one that serves as the
-{base model} in this thesis, is the {deep BSDE solver} of
-\citet{HanJentzenE2018}.  Backward stochastic differential equations
-(BSDEs), introduced in the non-linear setting by
-\citet{PardouxPeng1990} and applied to finance by
-\citet{ElKarouiPengQuenez1997}, provide a natural mathematical
-formulation of hedging problems.  In the BSDE setting, the portfolio
-value~$Y_t$ and the hedge ratio~$Z_t$ satisfy a coupled
-forward--backward system: the forward SDE describes the evolution of the
-underlying prices, while the backward equation propagates the terminal
-condition (the option payoff) back through time.  The connection to the
-optional decomposition is direct: the process~$Y$ corresponds to the
-wealth process~$V$, the control~$Z$ corresponds to the
-integrand~$\tilde{\varphi}$, and the driver of the backward equation
-encodes the cost structure associated with~$\tilde{C}$.
-
-The deep BSDE solver approximates the solution by parameterising the
+The \text{deep BSDE solver} \citep{HanJentzenE2018} approximates the
+backward stochastic differential equation (BSDE) that characterises the
+value process.  Given a terminal condition (the option payoff), it
+propagates the solution back through the time grid, parameterising the
 initial value~$Y_0$ and the control process~$Z_{t_k}$ at each discrete
-time step~$t_k$ with feedforward sub-networks, and training end-to-end by
-minimising the mean squared terminal error.  \citet{HanJentzenE2018}
-demonstrated that this approach scales to problems in hundreds of
-dimensions where classical PDE-based methods are infeasible.
-\citet{HurePhamWarin2020} extended the methodology to control problems
-and \citet{Gobet2023} applied it to hedging under incomplete markets.
-The deep BSDE solver is adopted as the base model in this thesis because
-of its direct structural correspondence with the backward equation that
-characterises the minimal dominating value process.
+step with feedforward sub-networks.  The structural correspondence to the
+optional decomposition is direct and important: the process~$Y$ maps to
+the wealth~$V$, the control~$Z$ maps to the predictable
+integrand~$\tilde{\varphi}$, and the driver of the backward equation
+encodes the cost structure associated with~$\tilde{C}$.  The network is
+therefore directly learning the object whose existence the optional
+decomposition theorem guarantees.
 
-\subsubsection{Path Generation via Variational Autoencoders}
+By contrast, the \text{deep hedging} framework
+\citep{BuehlerGononTeichmannWood2019} operates \text{forward} in time:
+it parameterises the trading strategy directly as a neural network and
+trains it end-to-end by minimising a risk functional applied to the
+distribution of hedging errors over simulated paths.  Rather than
+solving a backward equation, it searches directly over strategies to find
+one whose terminal hedging error is small.  Within this forward framework,
+two architectural choices are considered: a GRU recurrent network
+\citep{Cho2014} that maintains an evolving hidden state updated at each
+observation, and a feedforward network with \text{path signature
+features} \citep{Horvath2021} that constructs a static, fixed-dimensional
+mathematical summary of the path history.  A detailed review of these
+methods and their extensions is deferred to Chapter~2.
 
-Training any of the above deep learning methods requires large numbers of
-simulated price paths.  In addition to standard Monte Carlo simulation
-from parametric models, this thesis employs a {variational
-autoencoder} (VAE) \citep{KingmaWelling2014} trained on historical
-multi-asset equity data to generate synthetic sample paths.  The VAE
-learns a low-dimensional latent representation of the joint distribution
-of asset returns and produces synthetic trajectories that capture empirical
-features, such as volatility clustering, fat tails, and cross-asset
-dependence structures, that parametric models may not fully reproduce.
-This data-driven path generation follows the approach advocated by
-\citet{Wiese2020} and \citet{Ni2021}, and provides a robustness check
-against model misspecification: by evaluating hedging performance on both
-parametric and VAE-generated paths, one can assess the extent to which
-conclusions depend on the assumed data-generating process.  The historical
-dataset used and the VAE architecture are described in Chapter~3.
+The distinction between the backward and forward approaches has
+consequences for how each architecture captures the predictable and adapted
+components of the optional decomposition.  The deep BSDE solver directly
+targets the backward equation whose solution encodes the predictable
+integrand~$\tilde{\varphi}$.  The forward architectures optimise a risk
+functional over the terminal hedging error, implicitly
+learning~$\tilde{\varphi}$ through the gradient of the loss.  In both
+cases, whatever the network cannot learn ends up in the residual, which
+reflects the cost process~$\tilde{C}$.  Whether the GRU's recurrent
+memory, which updates its hidden state with information revealed at each
+time step, offers an advantage in capturing the adapted (non-predictable)
+nature of~$\tilde{C}$ relative to the static signature encoding is an
+empirical question that the thesis investigates.
 
-\subsubsection{Scope and Loss Function}
+Three specific gaps remain in the existing computational literature.
+First, no systematic comparison of these architectures has been conducted
+for American options under controlled incomplete-market models, where the
+neural network output is explicitly interpreted as the estimator
+of~$\tilde{\varphi}$ and the residual error as the empirical proxy
+for~$\tilde{C}$.  Deep hedging studies have primarily addressed European
+claims under transaction costs and market frictions; applications to
+American options under model ambiguity within the optional decomposition
+framework are absent.  Second, the distinct contributions of
+\text{structural} incompleteness (dimensional mismatch between traded
+assets and Brownian drivers, fixed at model specification) and
+\text{dynamic} incompleteness (stochastic volatility, evolving randomly
+through time) to the residual hedging cost have not been disentangled
+empirically.  Third, the residual error of trained hedging models has not
+been validated against the theoretical prediction that
+$\tilde{C} \equiv 0$ in the complete-market limit and $\tilde{C} > 0$
+otherwise.
 
-The thesis does not derive or extend any of the methods reviewed above.
-The deep BSDE solver, the deep hedging architectures, and the VAE path
-generator are all established methods with published convergence results
-and documented implementations.  The contribution is computational and
-empirical: implementing these methods under identical experimental
-conditions, applying them to the specific problem of hedging American put
-options in controlled incomplete-market settings, and comparing their
-performance.
-
-All three hedging architectures (deep BSDE, GRU, and FNN with path
-signatures) are trained using a common asymmetric loss function that
-penalises under-hedging more heavily than over-hedging:
+\paragraph{Loss function and actuarial rationale.}
+All three architectures are trained using a common asymmetric loss
+function:
 \begin{equation}
 \label{eq:loss}
 \mathcal{L}(\theta)
@@ -390,31 +374,65 @@ penalises under-hedging more heavily than over-hedging:
 \;+\; \lambda_c \, \operatorname{CVaR}_\alpha\!\bigl(\max(\xi_\tau
       - V_T^\theta,\, 0)\bigr),
 \end{equation}
-where $V_T^\theta$ is the terminal portfolio value under strategy
-$\varphi_\theta$, and $\operatorname{CVaR}_\alpha$ denotes the conditional
-value-at-risk at level~$\alpha$ \citep{RockafellarUryasev2000}.  The
-asymmetry $\lambda_s \gg \lambda_o$ reflects the practical reality that
-failing to cover an obligation is financially dangerous, whereas holding a
-modest surplus is merely capital-inefficient.  The CVaR term targets the
-tail of the shortfall distribution, penalising not just the average
-shortfall but the severity of the worst outcomes.  This loss function does
-not enforce the strict domination $V_t \ge \xi_t$ for all~$t$ that would
-characterise a full super-replicating strategy; instead, it encodes a
-{soft} preference for strategies whose shortfall is small and whose
-tail risk is controlled.  From the perspective of the optional
-decomposition, the mean residual hedging error of the trained model
-provides an empirical estimate of the expected value of the cost
-process~$\tilde{C}$, while the shortfall distribution characterises the
-pathwise behaviour of~$\tilde{C}$ across scenarios.  The precise
-calibration of the penalty parameters $\lambda_s$, $\lambda_o$, and
-$\lambda_c$ is described in Chapter~4.
+where $V_T^\theta$ is the terminal portfolio value under
+strategy~$\varphi_\theta$ and $\operatorname{CVaR}_\alpha$ denotes
+conditional value-at-risk at level~$\alpha$
+\citep{RockafellarUryasev2000}.  The three terms encode distinct financial
+objectives.
 
-The problem of computing the minimal dominating wealth process and its
-associated trading strategy is therefore computationally challenging:
-classical methods face scalability and model-dependence limitations, and
-established deep learning methods offer viable alternatives.  The thesis
-performs a comparative empirical study of these alternatives, as specified
-by the research questions in the next section.
+The first term, weighted by~$\lambda_s$, penalises \text{shortfall}:
+scenarios in which the portfolio fails to cover the option obligation.
+Financially, this is a solvency constraint.  A shortfall
+$\xi_\tau > V_T^\theta$ means the hedger cannot meet the liability, which
+constitutes a default event.  The second term, weighted by~$\lambda_o$,
+penalises \text{over-hedging}: scenarios in which the portfolio exceeds
+the obligation.  Financially, this is a capital efficiency constraint.  A
+surplus $V_T^\theta > \xi_\tau$ means the hedger has immobilised more
+capital than necessary, incurring an opportunity cost but without
+threatening solvency.  The asymmetry $\lambda_s \gg \lambda_o$ reflects
+the practical reality that default is far more costly than capital
+inefficiency.
+
+The third term targets the tail of the shortfall distribution using CVaR
+rather than standard Value-at-Risk.  Standard VaR reports only the
+threshold of a given quantile: it answers ``what is the worst loss at the
+95th percentile?''\ but is blind to how bad losses can be beyond that
+threshold.  CVaR averages over the entire tail beyond the quantile,
+penalising the \text{severity} of the worst outcomes rather than merely
+their \text{frequency} \citep{Artzner1999}.  For a hedger concerned with
+catastrophic shortfall scenarios, CVaR is the appropriate measure because
+it is sensitive to the shape of the tail, not just its location.
+
+This loss does not enforce the strict domination $V_t \ge \xi_t$ for
+all~$t$ that would characterise a full super-replicating strategy.
+Instead, it encodes a \text{soft} preference for strategies whose
+shortfall is small and whose tail risk is controlled.  From the perspective
+of the optional decomposition, the connection is direct: the mean residual
+hedging error of the trained model provides an empirical estimate of the
+expected value of~$\tilde{C}$ (the average cost of incompleteness), while
+the shortfall distribution characterises the pathwise behaviour
+of~$\tilde{C}$ across scenarios (how the cost varies from one market
+realisation to another).  The loss function therefore serves as the
+training objective that drives the neural network toward the best possible
+approximation of~$\tilde{\varphi}$, with the irreducible residual
+revealing~$\tilde{C}$.  Calibration of the penalty parameters
+$\lambda_s$, $\lambda_o$, and $\lambda_c$ is described in Chapter~4.
+
+\paragraph{Path generation and robustness.}
+Training requires large numbers of simulated price paths.  Alongside
+standard parametric simulation from the GBM and Heston models, this thesis
+employs a variational autoencoder (VAE) trained on historical multi-asset
+equity data to generate synthetic trajectories.  The VAE serves as a
+stress test for model misspecification: it captures empirical
+distributional features --- volatility clustering, fat tails, and
+cross-asset dependence structures --- that the parametric models may fail
+to reproduce.  By evaluating hedging performance on both parametric and
+VAE-generated paths, one can assess the extent to which conclusions depend
+on the assumed data-generating process.  If a hedging strategy performs
+well on parametric paths but poorly on VAE-generated paths, this signals
+that the strategy has overfit to model-specific features rather than
+learning a robust approximation of~$\tilde{\varphi}$.  The dataset and VAE
+architecture are described in Chapter~3.
 
 
 % =========================================================================
@@ -427,60 +445,56 @@ The thesis addresses the following empirical research questions.
 
 \begin{enumerate}
 \item \textbf{Approximation of the minimal dominating wealth process.}
-  Can neural-network-based trading strategies approximate the minimal
+  Can neural-network-based trading strategies, interpreted as estimators
+  of the predictable integrand~$\tilde{\varphi}$, approximate the minimal
   dominating wealth process implied by martingale duality in multi-asset
-  incomplete markets?  Specifically, how closely do the portfolio value
-  processes generated by the deep BSDE solver, the GRU network, and the
-  FNN with path signature features track the value
-  process~\eqref{eq:value_process}, and how does each architecture's
-  residual error compare with the others under identical market
-  conditions?
+  incomplete markets?  How closely do the deep BSDE solver, GRU network,
+  and FNN with path signature features track the value process, and how
+  do their residual errors compare under identical conditions?
 
 \item \textbf{Structural versus dynamic incompleteness.}
   How does the source of market incompleteness affect the magnitude and
   distribution of the residual hedging error?  The multi-factor GBM model
   introduces incompleteness through a dimensional mismatch between traded
-  assets and Brownian drivers (a structural feature fixed at time zero),
-  while the Heston model introduces it through the random evolution of
-  untraded variance processes (a dynamic feature that changes over time).
-  Comparing the two settings isolates the contribution of each mechanism
-  to the total hedging cost.
+  assets and Brownian drivers (a structural feature fixed at model
+  specification), while the Heston model introduces it through the random
+  evolution of untraded variance processes (a dynamic feature that changes
+  over time).  Comparing the two isolates the contribution of each
+  mechanism to the total hedging cost.
 
 \item \textbf{Recurrent memory and adapted cost components.}
-  The cost process~$\tilde{C}$ in the optional
-  decomposition~\eqref{eq:optional_decomp} is adapted but generally not
-  predictable \citep{Kramkov1996}: its value at time~$t$ may depend on
-  information revealed at~$t$ itself, not merely on information available
-  before~$t$.  The GRU architecture maintains an evolving hidden state
-  that is updated at each observation, while the FNN with path signatures
-  constructs a static, fixed-dimensional summary of the path history.
-  Does recurrent memory improve the approximation of adapted cost
-  components relative to feedforward or signature-based architectures?
+  The cost process~$\tilde{C}$ in the optional decomposition is adapted
+  but generally not predictable: its value at time~$t$ may depend on
+  information revealed at~$t$ itself.  The GRU architecture maintains an
+  evolving hidden state that is updated with each new observation,
+  potentially capturing information that arrives simultaneously with the
+  hedging decision.  The FNN with path signatures constructs a static,
+  fixed-dimensional summary of the path history computed from data
+  available strictly before the decision point.  Is the GRU's recurrent
+  memory better suited to approximating the non-predictable, adapted
+  component of the cost process~$\tilde{C}$ than the static signature
+  encoding?
 
-\item \textbf{Deep BSDE versus direct deep hedging.}
+\item \textbf{Backward versus forward deep learning approaches.}
   The deep BSDE solver approximates the hedging problem through a
-  backward equation, while the GRU and FNN-Sig architectures parameterise
-  the strategy directly and optimise a forward risk functional.  How do
-  these two approaches compare in terms of mean hedging error, tail risk
-  (measured by CVaR), and computational cost?
+  backward equation whose solution directly
+  encodes~$\tilde{\varphi}$.  The GRU and FNN-Sig architectures
+  parameterise the strategy directly and optimise a forward risk
+  functional.  How do these approaches compare in mean hedging error,
+  tail risk (measured by CVaR), and computational cost?
 
 \item \textbf{Robustness to model misspecification.}
   How do hedging models trained on VAE-generated paths, which reflect
   empirical distributional features learned from historical data, compare
   with those trained on parametric (GBM, Heston) simulations?  Does
-  data-driven path generation improve out-of-sample hedging performance
-  and reduce sensitivity to model assumptions?
+  data-driven path generation, serving as a stress test for model
+  assumptions, improve out-of-sample hedging performance?
 \end{enumerate}
 
-Each question is empirical in nature.  The thesis does not seek to prove
-new theoretical results, but to provide computational evidence on the
-performance of established methods in a setting, multi-asset American
-options under controlled incomplete-market models, that has not been
-studied in this specific combination.  The questions are designed so that
-the answers depend on measurable quantities (mean hedging error, shortfall
-probability, CVaR, and the distribution of the residual cost) that can be
-estimated from simulated experiments with controlled statistical
-uncertainty.
+Each question is empirical.  The answers depend on measurable quantities
+--- mean hedging error, shortfall probability, CVaR, and the distribution
+of the residual cost --- estimated from simulated experiments with
+controlled statistical uncertainty.
 
 
 % =========================================================================
@@ -495,58 +509,56 @@ numerical solvers are drawn from the established literature.
 
 \begin{enumerate}
 \item \textbf{Comparative evaluation under identical conditions.}
-  The thesis provides a systematic empirical comparison of three
-  neural-network-based hedging architectures: the deep BSDE solver
-  \citep{HanJentzenE2018}, a GRU recurrent network
-  \citep{BuehlerGononTeichmannWood2019, Cho2014}, and a feedforward
-  network with path signature features \citep{Horvath2021}.  All three
-  are applied to the same hedging problem under the same market models,
-  loss function, and evaluation protocol.  A two-stage experimental
-  design, consisting of Bayesian hyperparameter optimisation
-  \citep{Snoek2012} followed by retraining across multiple random seeds
-  \citep{Henderson2018, Bouthillier2021}, ensures that reported
-  performance reflects genuine model capability rather than fortunate
-  initialisation or hyperparameter selection.
+  A systematic empirical comparison of three neural-network-based hedging
+  architectures --- the deep BSDE solver, a GRU recurrent network, and a
+  feedforward network with path signature features --- applied to American
+  put options under the same market models, loss function, and evaluation
+  protocol.  A two-stage experimental design consisting of Bayesian
+  hyperparameter optimisation \citep{Snoek2012} followed by retraining
+  across multiple random seeds \citep{Henderson2018, Bouthillier2021}
+  ensures that reported performance reflects model capability rather than
+  fortunate initialisation.
 
 \item \textbf{Two-model study isolating sources of incompleteness.}
-  By comparing a multi-driver GBM model (structural incompleteness)
-  with a two-asset Heston model (dynamic incompleteness), the thesis
-  disentangles the contributions of dimensional mismatch and
-  stochastic volatility to the residual hedging error.  This provides
-  empirical evidence on how the {source} of incompleteness, not
-  merely its presence, affects hedging difficulty.
+  By comparing a multi-driver GBM model (structural incompleteness
+  through dimensional mismatch) with a two-asset Heston model (dynamic
+  incompleteness through stochastic volatility), the thesis disentangles
+  the contributions of each mechanism to the residual hedging error and
+  provides empirical evidence on how the \text{source} of
+  incompleteness, not merely its presence, affects hedging difficulty.
 
-\item \textbf{Tail-risk-based evaluation.}
-  Performance is evaluated using the asymmetric loss
-  function~\eqref{eq:loss} with a CVaR component, providing a
-  risk-sensitive assessment that goes beyond mean hedging error to
-  characterise the tail of the shortfall distribution.  This evaluation
-  is more informative than mean-squared-error comparisons for
-  applications in which the cost of under-hedging is asymmetric.
+\item \textbf{Tail-risk-based evaluation with actuarial rationale.}
+  Performance is evaluated using the asymmetric loss function with a CVaR
+  component, providing a risk-sensitive assessment that characterises the
+  tail of the shortfall distribution.  The solvency-oriented framing of
+  the shortfall penalty and the capital-efficiency interpretation of the
+  over-hedging penalty align the evaluation with actuarial risk management
+  principles.
 
 \item \textbf{Empirical proxy for the cost of incompleteness.}
-  The residual hedging error of the trained models is interpreted as
-  an empirical estimate of the adapted cost process~$\tilde{C}$ in
-  the optional decomposition~\eqref{eq:optional_decomp}.  The thesis
-  provides empirical evidence consistent with the theoretical
-  prediction that this cost is strictly positive in incomplete markets
-  and approximately zero in the complete-market limit.
+  The neural network output at each rebalancing date is interpreted as
+  the estimator of the predictable integrand~$\tilde{\varphi}$, and the
+  residual hedging error is interpreted as the empirical counterpart of
+  the adapted cost process~$\tilde{C}$ in the optional decomposition.
+  The thesis provides evidence consistent with the theoretical prediction
+  that~$\tilde{C}$ is strictly positive in incomplete markets and
+  approximately zero in the complete-market limit.
 
-\item \textbf{VAE-based path generation and robustness analysis.}
-  The use of a variational autoencoder trained on historical data
-  provides a data-driven complement to parametric simulation and
-  enables an assessment of model misspecification effects on hedging
-  performance.
+\item \textbf{VAE-based path generation as a stress test.}
+  A variational autoencoder trained on historical multi-asset equity data
+  provides a data-driven complement to parametric simulation.  By
+  capturing volatility clustering, fat tails, and cross-asset dependence
+  that parametric models may not reproduce, the VAE-generated paths serve
+  as a stress test for model misspecification, enabling assessment of the
+  robustness of hedging performance across data-generating assumptions.
 \end{enumerate}
 
-The thesis does not extend or modify any of the theoretical results or
-numerical methods cited above.  It uses established methods as
-computational tools and evaluates them on a problem that, to the best of
-the author's knowledge, has not been studied in this specific combination
-of models, instruments, and architectures.  Results are described as
-providing empirical evidence consistent with theoretical predictions, not
-as extending or proving those predictions.
-
+The thesis uses established methods as computational tools and evaluates
+them on a problem --- multi-asset American options under controlled
+incomplete-market models, interpreted through the optional decomposition
+framework with explicit identification of the predictable and adapted
+components --- that has not been studied in this combination of models,
+instruments, architectures, and interpretive lens.
 
 % =========================================================================
 % 1.6  STRUCTURE OF THE THESIS
