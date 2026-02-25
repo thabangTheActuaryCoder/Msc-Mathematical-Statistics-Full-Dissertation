@@ -1,23 +1,1052 @@
-% Chapter 2: Literature Review
-% Placeholder template - ~40 pages
-
+% =========================================================================
+% CHAPTER 2: LITERATURE REVIEW
+% =========================================================================
 \section{Literature Review}
 \label{sec:literature_review}
 
-% Content to be added
-% Sections should cover:
-% - Complete markets and replication
-% - Incomplete markets and super-hedging
-% - Optional decomposition of supermartingales
-% - Risk measures and quantitative hedging criteria
-% - Deep hedging frameworks
-% - Market models (GBM, Heston)
-% - Path signatures as feature representations
-% - Research gap and contribution
+This chapter surveys the mathematical and computational foundations on
+which the thesis rests.  The exposition follows the logical structure of
+the hedging problem itself: from the classical theory of replication in
+complete markets, through the challenges introduced by market
+incompleteness, to the representation theorems that characterise the
+minimal dominating wealth process, and finally to the deep learning
+architectures that provide computable approximations.  Each section
+introduces the economic motivation before the formal mathematics, and
+distinguishes clearly between existence results --- theorems guaranteeing
+that certain objects exist --- and constructive procedures --- algorithms
+that compute or approximate them.
 
+The literature reviewed here spans several fields: mathematical finance,
+stochastic analysis, risk management, and machine learning.  In each
+case, the focus is on the specific results and methods that are directly
+relevant to the problem formulated in Chapter~1: approximating the
+predictable integrand~$\tilde{\varphi}$ and the adapted cost
+process~$\tilde{C}$ in the optional decomposition of the minimal
+dominating wealth process for American options under non-unique martingale
+measures.
+
+
+% =========================================================================
+% 2.1  COMPLETE MARKETS AND REPLICATION
+% =========================================================================
 \subsection{Complete Markets and Replication}
 \label{subsec:complete_markets}
 
+The starting point for the theory of derivative pricing is the observation
+that, in certain idealised markets, the price of every contingent claim is
+determined not by the preferences of individual agents but by the
+requirement that no risk-free profit be available.  This section develops
+the classical theory of replication in complete markets, establishing the
+results that the remainder of the thesis will systematically relax.
+
+The theory is presented in six stages.  First, the economic logic of
+arbitrage pricing is explained without heavy notation.  Second, the
+probabilistic framework of semimartingales and equivalent measures is laid
+out.  Third, the fundamental theorems of asset pricing connect
+no-arbitrage to the existence and uniqueness of pricing measures.  Fourth,
+the martingale representation theorem is developed as the mathematical
+mechanism by which measure uniqueness translates into the existence of
+replicating strategies --- this is the step that ensures the cost
+process~$\tilde{C}$ vanishes identically.  Fifth, the replication of both
+European and American claims is treated, with particular attention to the
+Snell envelope and the Doob--Meyer decomposition.  Sixth, the structural
+reasons why the replication framework breaks down in practice are
+catalogued, motivating the transition to incomplete markets in
+Section~\ref{subsec:incomplete_markets}.
+
+
+% -----------------------------------------------------------------
+\subsubsection{Economic Motivation and Arbitrage Pricing}
+\label{sssec:arbitrage_pricing}
+
+Consider a financial market in which a derivative security --- say a
+European call option --- is available for trade alongside the underlying
+asset and a risk-free bond.  The derivative pays a known function of the
+asset price at maturity, and the question is: what is its fair price today?
+
+One approach is to model investor preferences, estimate the probability
+distribution of future asset prices, and compute the expected discounted
+payoff that a particular investor would be willing to accept.  This
+approach, rooted in equilibrium theory, requires specifying a utility
+function, a subjective probability measure, and an equilibrium condition.
+Different investors with different preferences would generally arrive at
+different prices, and the resulting theory would be as varied as the
+population of market participants.
+
+The insight of the arbitrage pricing approach, developed by
+\citet{BlackScholes1973} and \citet{Merton1973}, is that under certain
+conditions none of this is necessary.  If the derivative's payoff can be
+exactly replicated by a dynamically managed portfolio of the underlying
+asset and the bond, then the derivative's price must equal the cost of the
+replicating portfolio.  The argument is purely logical.  If the derivative
+were priced above the replicating portfolio, one could sell the derivative,
+buy the replicating portfolio, and pocket the difference at time zero; at
+maturity, the portfolio's payoff would exactly cover the derivative
+obligation, leaving a risk-free profit.  If the derivative were priced
+below the replicating portfolio, the reverse trade would yield the same
+result.  In either case, a risk-free profit emerges from zero initial
+investment --- an arbitrage.  Ruling out arbitrage forces the derivative
+price to equal the replication cost.
+
+Three conditions are needed for this argument to work.  First, the market
+must admit continuous trading in the underlying asset and the bond, so
+that the replicating portfolio can be adjusted without restriction.
+Second, there must be no transaction costs, so that the adjustment is
+costless.  Third, the replicating portfolio must exist: the dynamics of
+the underlying asset must be sufficiently rich that the derivative's
+payoff can be exactly matched by a trading strategy.
+
+The third condition is the one that defines market completeness.  A
+complete market is one in which every contingent claim can be replicated
+by trading in the available instruments.  In such a market, every
+derivative has a unique arbitrage-free price, and a trading strategy that
+produces the payoff with certainty can be explicitly constructed.  The
+price is independent of investor preferences because the replication
+argument does not involve preferences: it is a logical consequence of the
+absence of arbitrage.
+
+The mathematical challenge is to formalise these ideas --- to define
+precisely what ``replication'' and ``arbitrage'' mean in continuous time,
+and to characterise the class of markets in which completeness holds.
+This requires the probabilistic framework developed in the next
+subsection.
+
+
+% -----------------------------------------------------------------
+\subsubsection{Mathematical Market Framework}
+\label{sssec:prob_framework}
+
+The formal setting is a filtered probability space
+$(\Omega, \mathcal{F},
+\mathbb{F} := (\mathcal{F}_t)_{t \in [0,T]}, \mathbb{P})$
+satisfying the usual conditions of right-continuity and completeness, as
+specified in Section~\ref{subsec:math_formulation}.  The sample
+space~$\Omega$ represents the set of all possible market scenarios; each
+$\omega \in \Omega$ is a complete description of how every price, every
+interest rate, and every other market quantity evolves over the trading
+horizon~$[0,T]$.  The $\sigma$-algebra~$\mathcal{F}$ is the collection of
+all events about which questions can, in principle, be asked.  The
+filtration~$\mathbb{F}$ models the flow of information: the
+sub-$\sigma$-algebra~$\mathcal{F}_t$ contains every event that can be
+determined from observations up to and including time~$t$.
+The physical measure~$\mathbb{P}$ assigns probabilities to events and
+governs the statistical behaviour of prices as they would be observed in
+the real world: it encodes drift rates, volatility levels, correlation
+structures, and the frequencies of various market outcomes.
+
+Consider a market consisting of $d+1$ assets: a risk-free money market
+account $B_t = e^{rt}$ with constant interest rate $r \ge 0$, and $d$
+risky assets with undiscounted price processes $S^1, \ldots, S^d$.  The
+money market account serves as the num\'eraire: it defines the unit in
+which all other values are expressed.  The discounted price of asset~$i$
+is $X^i_t := e^{-rt} S^i_t = S^i_t / B_t$, and the vector
+$X := (X^1, \ldots, X^d)$ is assumed to be a locally bounded,
+c\`{a}dl\`{a}g semimartingale under~$\mathbb{P}$.  C\`{a}dl\`{a}g means
+right-continuous with left limits: at each time, the path is continuous
+from the right, and the left-hand limit exists.  This allows for price
+jumps (left-hand limit differs from the current value) while ensuring
+that the path is well-behaved enough for stochastic calculus.
+
+The semimartingale assumption is the minimal regularity condition under
+which a theory of stochastic integration can be developed.  A
+semimartingale is a process that admits the canonical decomposition
+\begin{equation}
+\label{eq:semimartingale_decomp}
+X_t \;=\; X_0 \;+\; M_t \;+\; A_t,
+\end{equation}
+where $M$ is a local martingale (a process with no systematic drift, when
+viewed locally) and $A$ is a process of locally finite variation (a
+process whose paths have finite total variation on every compact interval,
+almost surely).  The decomposition separates the unpredictable
+fluctuations of the price ($M$) from its systematic tendency ($A$).
+Economically, the local martingale component captures the ``noise'' in
+price movements --- the part that cannot be predicted from past
+information --- while the finite variation component captures the
+``signal'' --- the part that reflects expected returns, risk premia, or
+other systematic factors.
+
+The importance of the semimartingale assumption extends beyond technical
+convenience.  \citet{DelbaenSchachermayer1994} proved that the
+semimartingale property is implied by the absence of arbitrage: if
+discounted prices are not semimartingales, then arbitrage opportunities
+necessarily exist.  In other words, the semimartingale framework is not an
+arbitrary mathematical choice --- it is the largest class of processes
+that is compatible with economic equilibrium.
+
+A trading strategy is a predictable, $X$-integrable process
+$\varphi := (\varphi^1, \ldots, \varphi^d)$ specifying the number of
+units of each risky asset held at each time.  Predictability means that
+$\varphi_t$ is $\mathcal{F}_{t^-}$-measurable: the portfolio position at
+time~$t$ is determined using only information available strictly
+before~$t$.  This is not a mathematical convenience but an economic
+necessity --- the hedger must decide how many shares to hold before
+observing the next price movement.  Any strategy that could ``see'' the
+current price increment before committing to a position would violate the
+information structure of the market and correspond to insider trading
+rather than legitimate hedging.
+
+Given an initial capital $v \in \mathbb{R}$ and a self-financing
+strategy~$\varphi$, the gains-from-trade process is the stochastic
+integral
+\begin{equation}
+\label{eq:gains_from_trade}
+G_t(\varphi)
+\;:=\; \int_0^t \varphi_s \cdot dX_s
+\;=\; \sum_{i=1}^{d} \int_0^t \varphi^i_s \, dX^i_s,
+\end{equation}
+and the wealth process is $V_t = v + G_t(\varphi)$.  The stochastic
+integral $\int_0^t \varphi_s \cdot dX_s$ formalises the cumulative
+profit or loss from trading: it accumulates the products of position sizes
+and price increments over the trading horizon, in the same way that the
+profit from holding $\varphi$ shares over a small interval $[s, s+ds]$ is
+approximately $\varphi_s \, dX_s$.  The self-financing condition means
+that no external funds are injected or withdrawn: all changes in wealth
+are driven by trading gains alone.
+
+The notion of admissibility controls which strategies are permitted.  Two
+definitions appear in the literature, and the distinction is relevant
+because it affects which representation theorems apply.
+\citet{DelbaenSchachermayer1994} define a strategy as admissible if
+$V_t \ge -a$ for all $t \in [0,T]$ and some constant $a \ge 0$: the
+wealth process is bounded below, but the bound need not be zero.  This
+definition is natural for the first fundamental theorem, where the goal is
+to characterise the absence of arbitrage.  \citet{Kramkov1996} uses the
+stronger requirement that $V_t \ge 0$ for all~$t$: the wealth process
+must remain non-negative.  This stronger condition is needed for the
+optional decomposition theorem
+(Section~\ref{subsec:optional_decomposition}), which characterises the
+minimal dominating wealth process.  The non-negativity constraint ensures
+that the hedger cannot borrow indefinitely against future gains, and it is
+the appropriate condition for the super-hedging and domination problems
+studied in this thesis.  Throughout this thesis, admissibility is defined
+in the sense of \citet{Kramkov1996}: $V_t \ge 0$ for all $t \in [0,T]$.
+
+
+% -----------------------------------------------------------------
+\subsubsection{Fundamental Theorems of Asset Pricing}
+\label{sssec:FTAP}
+
+The probabilistic concept that makes arbitrage pricing work is the change
+of probability measure.  Under the physical measure~$\mathbb{P}$,
+discounted asset prices typically have non-zero expected returns: investors
+demand compensation for bearing risk, so on average discounted prices
+drift upward.  A price at time~$t$ that reflects the risk premium earned
+by the asset does not, in general, equal the expected value of the
+discounted future price.  But the replication argument is indifferent to
+expected returns --- it depends only on the volatility structure of price
+movements, not their average direction.  If one could find a probability
+measure under which the drift vanished --- so that discounted prices had
+zero expected change --- then the price of any replicable claim would
+equal a simple expectation under that measure.
+
+This is the role of the equivalent martingale measure.  It is a
+probability measure that reassigns the likelihood of different market
+scenarios so that, on average, discounted prices neither rise nor fall.
+The change of measure does not alter which events are possible (it is
+equivalent to~$\mathbb{P}$, meaning it agrees on which events have
+zero probability); it only adjusts how likely each event is.  Under the
+new measure, the market becomes ``fair'' in the precise sense that no
+trading strategy has a positive expected gain, which is the mathematical
+expression of no-arbitrage.
+
+\begin{definition}[Equivalent local martingale measure]
+\label{def:ELMM}
+A probability measure $\mathbb{Q}$ defined on
+$(\Omega, \mathcal{F})$ is an equivalent local martingale
+measure (ELMM) for the discounted price process~$X$ if:
+\begin{enumerate}
+  \item $\mathbb{Q} \sim \mathbb{P}$, meaning $\mathbb{Q}$ and
+    $\mathbb{P}$ have the same null sets: for every event $A \in
+    \mathcal{F}$, $\mathbb{P}(A) = 0$ if and only if
+    $\mathbb{Q}(A) = 0$.
+  \item Each component $X^i$, $i = 1, \ldots, d$, is a local martingale
+    under~$\mathbb{Q}$: there exists a localising sequence of stopping
+    times $(\tau_n)_{n \ge 1}$ with $\tau_n \uparrow \infty$ such that
+    the stopped process $X^{i,\tau_n}$ is a $\mathbb{Q}$-martingale for
+    each~$n$.
+\end{enumerate}
+The set of all such measures is denoted~$\mathcal{M}(X)$.
+\end{definition}
+
+The equivalence condition $\mathbb{Q} \sim \mathbb{P}$ is economically
+substantive.  It ensures that the pricing measure and the physical
+measure agree on which events are possible: every market scenario that
+could occur in the real world ($\mathbb{P}(A) > 0$) receives positive
+probability under~$\mathbb{Q}$, and conversely.  A pricing measure that
+assigned zero probability to a scenario that could actually materialise
+would be ignoring a real risk; a pricing measure that assigned positive
+probability to an impossible scenario would be introducing a phantom
+risk.  Equivalence prevents both pathologies.
+
+The local martingale condition is a weakening of the full martingale
+condition.  A process is a martingale if its conditional expectation at
+any future time equals its current value: $\mathbb{E}^{\mathbb{Q}}
+[X_t \mid \mathcal{F}_s] = X_s$ for all $s \le t$.  A local martingale
+only requires this property to hold locally, after stopping the process at
+times that prevent it from becoming too large.  The distinction matters
+for continuous-time models with unbounded prices, where the full
+martingale property may fail due to integrability issues (e.g.,
+exponential martingales that are only local martingales).  For the locally
+bounded processes considered in this thesis, the distinction is primarily
+technical rather than economic.  In many diffusion models, discounted
+prices are true martingales under suitable integrability conditions; in
+general semimartingale settings, local martingale is the correct minimal
+requirement.
+
+The relationship between the physical and pricing measures is governed by
+the Radon--Nikod\'ym theorem: since $\mathbb{Q} \sim \mathbb{P}$, there
+exists a positive random variable $L_T := d\mathbb{Q}/d\mathbb{P}
+|_{\mathcal{F}_T}$ such that
+$\mathbb{E}^{\mathbb{Q}}[Y] = \mathbb{E}^{\mathbb{P}}[L_T Y]$ for
+every bounded $\mathcal{F}_T$-measurable random variable~$Y$.  The
+density process $L_t := \mathbb{E}^{\mathbb{P}}[L_T \mid \mathcal{F}_t]$
+is a positive $\mathbb{P}$-martingale with $L_0 = 1$.  Intuitively, $L_t$
+represents the ``exchange rate'' between the two measures at time~$t$: it
+re-weights the likelihood of different scenarios to remove the risk
+premium from asset prices.
+
+The two fundamental theorems of asset pricing connect these mathematical
+objects to the economic structure of the market.  The development of these
+theorems spans three decades and several increasingly general
+formulations, each motivated by the limitations of the previous one.  The
+progression is worth tracing because it illuminates the precise
+mathematical conditions under which the theory applies and identifies
+where generalisation is still needed for the models in this thesis.
+
+\citet{HarrisonKreps1979} established the first fundamental connection
+between no-arbitrage and the existence of a pricing measure, working in a
+discrete-time framework with a finite number of trading periods and states.
+In their setting, a simple no-arbitrage condition suffices, and the pricing
+measure is a full martingale measure (not merely a local martingale
+measure).  \citet{HarrisonPliska1981} extended this framework to allow for
+continuous trading in a single period, proved the second fundamental
+theorem connecting uniqueness to completeness, and established the
+martingale characterisation of attainable claims.  However, both
+formulations rely on assumptions --- finite state spaces or specific
+process structures --- that are too restrictive for continuous-time
+models driven by Brownian motion.
+
+The definitive generalisation was provided by
+\citet{DelbaenSchachermayer1994}, who worked in the full generality of
+locally bounded semimartingales.  Their contribution was twofold.  First,
+they showed that simple no-arbitrage is insufficient in continuous time: a
+stronger condition, no free lunch with vanishing risk (NFLVR), is
+required.  NFLVR rules out not only exact arbitrage but also sequences of
+approximate arbitrages whose risk vanishes in the limit --- a pathology
+that cannot occur in discrete time but arises naturally in
+continuous-time models.  Second, they showed that the pricing measure need
+only make discounted prices into local martingales, not full
+martingales, because the full martingale property may fail for unbounded
+processes even when no arbitrage is present.  These two generalisations
+--- from no-arbitrage to NFLVR, and from martingale measures to local
+martingale measures --- are what make the theory applicable to the
+continuous semimartingale models used in this thesis.
+
+The progression from \citet{HarrisonKreps1979} through
+\citet{HarrisonPliska1981} to \citet{DelbaenSchachermayer1994} thus
+represents not merely a chronological refinement but a systematic
+weakening of hypotheses---from finite state spaces to general
+semimartingales, from exact martingale measures to local martingale
+measures, and from simple no-arbitrage to NFLVR---each step expanding
+the class of models to which the fundamental theorems apply while
+preserving their economic content.  The cost of this generality is that
+constructive tools (explicit Girsanov transforms, closed-form densities)
+are available only in specific parametric models, a limitation that
+becomes acute in the incomplete-market setting of
+Section~\ref{subsec:incomplete_markets}.
+
+\begin{theorem}[First fundamental theorem of asset pricing
+{\citep{DelbaenSchachermayer1994}}]
+\label{thm:FTAP1}
+Let $X$ be a locally bounded, c\`{a}dl\`{a}g semimartingale.  The
+market satisfies no free lunch with vanishing risk (NFLVR) if and only
+if $\mathcal{M}(X) \neq \emptyset$.
+\end{theorem}
+
+\noindent What the theorem says mathematically.
+The theorem establishes a bijective correspondence between an economic
+property of the market (NFLVR) and a mathematical property of a set
+of probability measures ($\mathcal{M}(X) \neq \emptyset$).  The ``only
+if'' direction --- NFLVR implies the existence of at least one ELMM ---
+is the mathematically deep part; the proof constructs a measure from the
+economic assumption using functional analysis (specifically, a separation
+argument in $L^\infty$).  The ``if'' direction is more straightforward:
+under any~$\mathbb{Q} \in \mathcal{M}(X)$, the gains-from-trade process
+$G_t(\varphi) = \int_0^t \varphi_s \cdot dX_s$ is a local martingale (as
+a stochastic integral with respect to a local martingale) and, under the
+admissibility condition $V_t \ge 0$, a supermartingale with
+$G_0(\varphi) = 0$.  Therefore
+$\mathbb{E}^{\mathbb{Q}}[G_T(\varphi)] \le 0$ for every admissible
+strategy, which precludes strategies with non-negative, strictly positive
+payoffs.
+
+\noindent What the theorem means financially.
+The theorem transforms an economic question --- ``can anyone make
+risk-free profits in this market?'' --- into a mathematical one ---
+``does the set~$\mathcal{M}(X)$ contain at least one element?''  The
+existence of a pricing measure certifies the economic coherence of the
+model: prices are consistent with the absence of arbitrage.  The measure
+itself is a computational device; it is not a physical entity and it need
+not represent any agent's beliefs about the world.
+
+\noindent What the theorem does not provide.
+The theorem is an existence result: it guarantees that at least one ELMM
+exists but does not construct it.  In specific models, the measure can be
+identified explicitly through the Girsanov theorem (as we demonstrate
+below for the Black--Scholes model).  In general, the theorem provides a
+theoretical guarantee but not a recipe.  Moreover, the theorem says
+nothing about uniqueness: $\mathcal{M}(X)$ may contain one element or
+uncountably many.  The question of uniqueness --- which turns out to be
+equivalent to market completeness --- is addressed by the second
+fundamental theorem.
+
+\begin{theorem}[Second fundamental theorem of asset pricing
+{\citep{HarrisonPliska1981}}]
+\label{thm:FTAP2}
+Let $X$ be a locally bounded semimartingale satisfying NFLVR.  The
+market is complete if and only if $|\mathcal{M}(X)| = 1$.
+\end{theorem}
+
+\noindent What the theorem says mathematically.
+The theorem provides a characterisation of market completeness in terms
+of the cardinality of the set of equivalent local martingale measures:
+completeness is equivalent to uniqueness.  The ``only if'' direction uses
+a separation argument: if two distinct measures $\mathbb{Q}_1,
+\mathbb{Q}_2 \in \mathcal{M}(X)$ existed, one could construct a claim
+$H = \mathbf{1}_A$ for an event $A$ with
+$\mathbb{Q}_1(A) \neq \mathbb{Q}_2(A)$; this claim would have two
+different arbitrage-free prices and hence could not be replicable.  The
+``if'' direction is the deeper half and relies on the martingale
+representation theorem, developed in the next subsection: when only one
+measure exists, the filtration is generated by the price process alone, and
+every $\mathbb{Q}$-martingale can be written as a stochastic integral with
+respect to~$X$.
+
+\noindent What the theorem means financially.
+In a complete market, there is no ambiguity in derivative pricing.  Every
+derivative has exactly one arbitrage-free price, and a replicating
+strategy exists for every payoff.  The price can be computed as a single
+expectation under the unique measure~$\mathbb{Q}$:
+\begin{equation}
+\label{eq:risk_neutral_pricing}
+\pi(H) \;=\; \mathbb{E}^{\mathbb{Q}}[e^{-rT} H],
+\end{equation}
+and the replicating strategy can be extracted from the martingale
+representation of the discounted claim (see
+Section~\ref{sssec:mart_rep}).  Every market participant, using the same
+model, must arrive at the same price.
+
+When $|\mathcal{M}(X)| > 1$, the market is incomplete: some claims are
+not replicable, and different measures in~$\mathcal{M}(X)$ assign them
+different prices.  The unique price~\eqref{eq:risk_neutral_pricing}
+gives way to the price interval~\eqref{eq:price_interval}, and the
+replication strategy gives way to the approximate hedging strategies that
+are the subject of this thesis.
+
+\noindent Computational implication.
+When the market is complete, the computational problem of pricing and
+hedging is fully solved in principle: compute the single
+expectation~\eqref{eq:risk_neutral_pricing} and differentiate to
+obtain the hedge ratios.  The optional decomposition of
+Chapter~1, equation~\eqref{eq:optional_decomp}, reduces to a
+self-financing replication: the cost process $\tilde{C} \equiv 0$, and
+the entire value process is generated by the gains-from-trade integral.
+This degenerate case serves as a baseline for the experiments in
+Chapter~5: a correctly functioning neural network hedger should produce
+near-zero residual error in the complete-market limit, confirming that
+the architecture can learn the predictable integrand when no adapted
+cost component is present.
+
+\noindent Structural limitation.
+The second fundamental theorem characterises completeness but does not
+prescribe how to verify it in a given model.  In practice, one checks
+completeness by counting dimensions: if the filtration is generated by a
+$d$-dimensional Brownian motion and there are $d$ traded risky assets
+whose volatility matrix is non-degenerate, the martingale representation
+theorem (next subsection) guarantees that every martingale is a stochastic
+integral with respect to the price process, and the market is complete.
+When the number of Brownian drivers exceeds the number of traded assets,
+or when additional state variables (such as stochastic volatility) are
+present, the representation fails and the market is incomplete.  This
+dimensional diagnostic is the basis for the two-model design of this
+thesis: the multi-factor GBM model creates a dimensional mismatch
+directly, while the Heston model introduces an untraded state variable.
+
+
+% -----------------------------------------------------------------
+\subsubsection{Martingale Representation and the Predictable Integrand}
+\label{sssec:mart_rep}
+
+The fundamental theorems establish when replication is possible
+(when $|\mathcal{M}(X)| = 1$), but they do not explain how the
+replicating strategy is constructed.  The mathematical mechanism that
+converts measure uniqueness into an explicit trading strategy is the
+martingale representation theorem.  This result is the reason the cost
+process~$\tilde{C}$ vanishes in complete markets, and its failure in
+incomplete markets is the reason~$\tilde{C}$ becomes strictly positive.
+Because this mechanism is central to the interpretation of the neural
+network output throughout the thesis, it merits a dedicated treatment.
+
+\paragraph{The predictable representation property.}
+Let $W = (W^1, \ldots, W^d)$ be a $d$-dimensional Brownian motion on
+$(\Omega, \mathcal{F}, \mathbb{Q})$, and let $\mathbb{F}^W$ denote the
+(augmented) filtration generated by~$W$.  The predictable representation
+property states that every $(\mathbb{F}^W, \mathbb{Q})$-local martingale
+$N$ can be written as a stochastic integral with respect to~$W$:
+\begin{equation}
+\label{eq:PRP}
+N_t \;=\; N_0 \;+\; \sum_{j=1}^{d} \int_0^t \psi^j_s \, dW^j_s,
+\end{equation}
+for some predictable, square-integrable process
+$\psi = (\psi^1, \ldots, \psi^d)$.  The key condition is that
+$\mathbb{F}^W$ is the filtration generated by~$W$: no additional sources
+of information are present beyond the Brownian motion itself.
+
+\noindent What the theorem says mathematically.
+Every source of randomness in the model --- every martingale adapted to
+the Brownian filtration --- can be decomposed into a weighted sum of
+stochastic integrals against the individual Brownian components.  The
+integrand~$\psi$ is uniquely determined up to
+$\mathbb{Q} \otimes dt$-null sets.  This is not an approximation result;
+it is an exact decomposition: nothing is left over.
+
+\noindent Financial interpretation.
+If the market filtration is generated by a $d$-dimensional Brownian motion
+and there are $d$ traded risky assets whose volatility matrix
+$\sigma := (\sigma^{ij})$ is invertible, then any claim that depends on
+the Brownian motion can be replicated by trading in the $d$ assets.  The
+key step is a change of integrand: from the representation~\eqref{eq:PRP}
+in terms of~$W$, one obtains a representation in terms of the price
+process~$X$ by the transformation $\varphi = \psi \, \sigma^{-1}$.  The
+invertibility of~$\sigma$ is what allows the translation from Brownian
+integrals to trading integrals.
+
+\paragraph{Application to the Black--Scholes model.}
+Under the physical measure~$\mathbb{P}$, the price of a single risky
+asset follows geometric Brownian motion:
+\begin{equation}
+\label{eq:GBM_P}
+dS_t \;=\; \mu \, S_t \, dt \;+\; \sigma \, S_t \, dW_t^{\mathbb{P}},
+\end{equation}
+where $\mu \in \mathbb{R}$ is the drift (expected return per unit time),
+$\sigma > 0$ is the constant volatility, and $W^{\mathbb{P}}$ is a
+standard Brownian motion under~$\mathbb{P}$.  The model has one traded
+risky asset and one source of randomness: the single Brownian motion
+$W^{\mathbb{P}}$.  This one-to-one correspondence between instruments and
+risk factors is what makes the model complete.
+
+The Girsanov theorem provides the constructive tool for identifying the
+unique equivalent local martingale measure.  Define the market price of
+risk
+\begin{equation}
+\label{eq:market_price_risk_BSM}
+\gamma \;:=\; \frac{\mu - r}{\sigma},
+\end{equation}
+which measures the excess return per unit of volatility --- the
+compensation that the market demands for bearing one unit of the asset's
+risk.  Define the Radon--Nikod\'ym density
+\begin{equation}
+\label{eq:girsanov_BSM}
+\frac{d\mathbb{Q}}{d\mathbb{P}} \bigg|_{\mathcal{F}_T}
+\;=\; \exp\!\Bigl(-\gamma \, W_T^{\mathbb{P}}
+      - \tfrac{1}{2} \gamma^2 T\Bigr)
+\;=:\; L_T.
+\end{equation}
+The process $L_t := \mathbb{E}^{\mathbb{P}}[L_T \mid \mathcal{F}_t]
+= \exp(-\gamma W_t^{\mathbb{P}} - \frac{1}{2}\gamma^2 t)$ is a positive
+$\mathbb{P}$-martingale with $L_0 = 1$, and therefore $\mathbb{Q}$
+defined by $d\mathbb{Q} = L_T \, d\mathbb{P}$ is a probability measure
+equivalent to~$\mathbb{P}$.  By the Girsanov theorem, the process
+\begin{equation}
+\label{eq:girsanov_W}
+W_t^{\mathbb{Q}} \;:=\; W_t^{\mathbb{P}} + \gamma \, t
+\end{equation}
+is a standard Brownian motion under~$\mathbb{Q}$.  Substituting
+into~\eqref{eq:GBM_P}, the discounted price
+$X_t = e^{-rt} S_t$ satisfies
+\begin{equation}
+\label{eq:GBM_Q}
+dX_t \;=\; \sigma \, X_t \, dW_t^{\mathbb{Q}}.
+\end{equation}
+The drift has been removed: under~$\mathbb{Q}$, the discounted price is a
+(geometric) martingale.
+
+The construction is unique because the Girsanov theorem requires a
+one-dimensional market price of risk~$\gamma$ to satisfy one equation
+($\sigma \gamma = \mu - r$), yielding a unique
+solution~\eqref{eq:market_price_risk_BSM}.  This confirms
+$|\mathcal{M}(X)| = 1$.  The uniqueness is a direct consequence of the
+dimensional balance: one equation, one unknown, one solution.
+
+\paragraph{From representation to replication.}
+Given the unique measure~$\mathbb{Q}$, the price of a European claim
+with payoff $H = h(S_T)$ is
+\begin{equation}
+\label{eq:BSM_price}
+\pi_t \;=\; e^{-r(T-t)} \,
+\mathbb{E}^{\mathbb{Q}}[h(S_T) \mid \mathcal{F}_t]
+\;=:\; u(t, S_t),
+\end{equation}
+where $u : [0,T] \times (0,\infty) \to \mathbb{R}$ is the pricing
+function.  The discounted claim price $e^{-rt} u(t, S_t)$ is a
+$\mathbb{Q}$-martingale adapted to the filtration of~$W^{\mathbb{Q}}$.
+By the predictable representation property~\eqref{eq:PRP}, it admits the
+decomposition
+\begin{equation}
+\label{eq:mart_rep_BSM}
+e^{-rt} u(t, S_t) \;=\; u(0, S_0)
+\;+\; \int_0^t \psi_s \, dW_s^{\mathbb{Q}}
+\end{equation}
+for a unique predictable process~$\psi$.  Since
+$dX_t = \sigma X_t \, dW_t^{\mathbb{Q}}$, the substitution
+$\varphi_t := \psi_t / (\sigma X_t)$ gives the equivalent representation
+in terms of the price process:
+\begin{equation}
+\label{eq:rep_in_X}
+e^{-rt} u(t, S_t) \;=\; u(0, S_0)
+\;+\; \int_0^t \varphi_s \, dX_s.
+\end{equation}
+It\^o's formula applied to $e^{-rt} u(t, S_t)$ identifies the integrand
+explicitly:
+\begin{equation}
+\label{eq:delta_hedge}
+\varphi_t \;=\; \frac{\partial u}{\partial S}(t, S_t).
+\end{equation}
+This is the classical delta: the sensitivity of the option price to a
+change in the underlying asset price.  The strategy that holds
+$\varphi_t$ units of the risky asset at each time~$t$ perfectly
+replicates the claim, and the cost of the replicating portfolio equals
+the option price $\pi_0 = u(0, S_0)$.
+
+\paragraph{Connection to the optional decomposition.}
+Equation~\eqref{eq:rep_in_X} is the complete-market instance of the
+optional decomposition~\eqref{eq:optional_decomp}.  Comparing the two
+makes the role of each component transparent.  In the optional
+decomposition $\tilde{V}_t = \tilde{V}_0 + \int_0^t \tilde{\varphi}_s
+\, dX_s - \tilde{C}_t$, the initial capital~$\tilde{V}_0$ corresponds
+to~$\pi_0$, the predictable integrand~$\tilde{\varphi}$ corresponds to
+the delta~$\varphi$, and the cost process~$\tilde{C}$ is identically
+zero.  The vanishing of~$\tilde{C}$ is a direct consequence of the
+predictable representation property: because every martingale in the
+Brownian filtration can be written as a stochastic integral against~$X$,
+nothing is left over that the trading strategy cannot capture.
+
+In the standard Brownian setting with non-degenerate volatility and
+filtration generated by the driving noise, the chain of logic is:
+\begin{center}
+\fbox{\parbox{0.85\textwidth}{
+$|\mathcal{M}(X)| = 1$
+\;$\Longrightarrow$\;
+filtration $= \mathbb{F}^W$ (under modelling assumptions)
+\;$\Longrightarrow$\;
+predictable representation~\eqref{eq:PRP}
+\;$\Longrightarrow$\;
+$\tilde{C} \equiv 0$.
+}}
+\end{center}
+When any link in this chain breaks --- when the filtration contains
+information not generated by the traded assets' Brownian motions, or when
+the volatility matrix is not invertible --- the representation fails, and
+$\tilde{C}$ becomes strictly positive.  The multi-factor GBM model breaks
+the chain at the second step (the filtration contains extra Brownian
+motions); the Heston model breaks it at both the first and second steps
+(the filtration contains the variance process, and the set of martingale
+measures is non-singleton).
+
+\paragraph{Computational cost of the delta hedge.}
+For the European call with payoff $h(S_T) = (S_T - K)^+$, the pricing
+function $u$ is the Black--Scholes formula
+\begin{equation}
+\label{eq:BS_call}
+u(t, S) \;=\; S \, \Phi(d_+) \;-\; K e^{-r(T-t)} \Phi(d_-),
+\end{equation}
+where $\Phi$ is the standard normal CDF,
+$d_{\pm} := \frac{\ln(S/K) + (r \pm \sigma^2/2)(T-t)}{\sigma\sqrt{T-t}}$,
+and the delta is $\varphi_t = \Phi(d_+(t, S_t))$.  The European put
+follows by put--call parity.  In this setting, computing the hedge ratio
+at each rebalancing date is trivial: evaluate a closed-form expression
+involving the normal CDF.
+
+This computational simplicity is specific to the Black--Scholes model.
+Even within the class of complete markets, moving to multi-asset models or
+path-dependent payoffs eliminates closed-form expressions for the
+delta~\eqref{eq:delta_hedge}.  The pricing function $u$ must then be
+obtained by solving a PDE numerically (finite differences, finite
+elements) or by Monte Carlo estimation, and the delta must be extracted by
+numerical differentiation --- a procedure that is noisy when the
+underlying estimator has statistical error and expensive when the state
+space is high-dimensional.  In the multi-asset models of this thesis, the
+state space is at least four-dimensional (two asset prices and two
+variance processes), and PDE methods become impractical due to the curse
+of dimensionality \citep{Glasserman2003}.  This computational barrier is
+one of the primary motivations for approximating~$\tilde{\varphi}$ with
+neural networks rather than solving for it analytically or via grid-based
+methods: the neural network learns a mapping from state to portfolio
+weight that can be evaluated at negligible cost per path, regardless of
+the dimension of the state space.
+
+
+% -----------------------------------------------------------------
+\subsubsection{Replication of European and American Claims}
+\label{sssec:replication_claims}
+
+With the martingale representation theorem in hand, the replication of
+European claims in complete markets is immediate: the discounted claim
+price is a $\mathbb{Q}$-martingale, the representation theorem
+decomposes it as a stochastic integral, and the integrand is the hedging
+strategy.  American claims require an additional step because the exercise
+time is not fixed in advance.
+
+\paragraph{European claims.}
+For a European claim $H = h(S_T)$ in the Black--Scholes model, the
+replication result is:
+\begin{equation}
+\label{eq:european_replication}
+e^{-rT} H \;=\; \pi_0
+\;+\; \int_0^T \varphi_s \, dX_s,
+\qquad
+\varphi_t = \frac{\partial u}{\partial S}(t, S_t),
+\end{equation}
+where $\pi_0 = u(0, S_0)$ and $u$ is the pricing function.  The
+replication is exact: the strategy $\varphi$ produces the payoff $H$
+with probability one, and no residual cost remains.
+
+\paragraph{American claims: the optimal stopping problem.}
+Consider an American put option with strike~$K$ and maturity~$T$ on
+asset~$i$ in a complete market with unique measure~$\mathbb{Q}$.  The
+discounted reward process is
+\begin{equation}
+\label{eq:american_reward_ch2}
+\xi_t \;:=\; e^{-rt}(K - S^i_t)^+, \qquad t \in [0,T].
+\end{equation}
+The holder's problem is to choose a stopping time $\tau \in
+\mathcal{T}_{[0,T]}$ that maximises the expected discounted payoff.
+The fair price at time~$t$ is
+\begin{equation}
+\label{eq:american_price_complete}
+\pi_t(\xi) \;=\;
+\esssup_{\tau \in \mathcal{T}_{[t,T]}}
+\mathbb{E}^{\mathbb{Q}}[\xi_\tau \mid \mathcal{F}_t].
+\end{equation}
+
+\paragraph{The Snell envelope.}
+The value process $(\pi_t(\xi))_{t \in [0,T]}$ is the Snell
+envelope of the reward process~$\xi$ under~$\mathbb{Q}$.  The concept
+was introduced by \citet{Snell1952} in the context of sequential decision
+theory.  The Snell envelope is the smallest $\mathbb{Q}$-supermartingale
+that dominates the reward process: $\pi_t(\xi) \ge \xi_t$ for all~$t$,
+and any other $\mathbb{Q}$-supermartingale $Y$ with $Y_t \ge \xi_t$ for
+all~$t$ also satisfies $Y_t \ge \pi_t(\xi)$ for all~$t$.
+
+The existence of this smallest dominating supermartingale is not
+self-evident.  It relies on the fact that the class of
+$\mathbb{Q}$-supermartingales dominating~$\xi$ is closed under a
+lattice-type operation: the essential infimum of any family of
+supermartingales dominating~$\xi$ is itself a supermartingale
+dominating~$\xi$, provided the family is directed downward.  For reward
+processes that are right-continuous and of class~(D) --- conditions
+satisfied by the discounted American put payoff~\eqref{eq:american_reward_ch2},
+which is non-negative and bounded above by~$K$ --- this closure property
+holds, and the Snell envelope is well-defined.  A detailed treatment can
+be found in \citet{KaratzasShreve1998} and \citet{Peskir2006}.
+
+\noindent Financial interpretation.  The Snell envelope is the
+minimum amount of wealth that the option seller must maintain to guarantee
+coverage of the American option at every point in time.  At each
+instant, $\pi_t(\xi)$ is at least as large as the exercise value~$\xi_t$
+(the seller must be able to pay if the holder exercises now) and equals
+the conditional expectation of the best future exercise value (if it is
+optimal to continue, the seller can afford to do so).
+
+The optimal exercise time is the first time the Snell envelope coincides
+with the reward process:
+\begin{equation}
+\label{eq:optimal_stopping_time}
+\tau^* \;:=\; \inf\{t \ge 0 : \pi_t(\xi) = \xi_t\}.
+\end{equation}
+At $\tau^*$, the option holder exercises because the value of holding is
+exactly equal to the value of exercising --- there is no benefit to
+waiting further.  The stopped process
+$(\pi_{t \wedge \tau^*}(\xi))_{t \in [0,T]}$ is a $\mathbb{Q}$-martingale:
+once the stopping decision has been made, the residual randomness is
+removed.
+
+\paragraph{Doob--Meyer decomposition and hedging.}
+The continuous-time theory of American option pricing was developed by
+\citet{Bensoussan1984} and \citet{Karatzas1988}, who established the
+connection between the Snell envelope, free-boundary problems, and
+variational inequalities.  An important alternative perspective was
+provided by the early exercise premium decomposition of
+\citet{Kim1990} and \citet{CarrJarrowMyneni1992}, which represents the
+American option price as the sum of the corresponding European option
+price and an integral over the exercise boundary.  This decomposition
+provides economic insight --- the early exercise premium quantifies the
+additional value created by the right to exercise before maturity --- and
+has been used for analytical approximations.  However, the
+Snell-envelope/Doob--Meyer framework is the one that connects directly to
+the optional decomposition, and it is therefore the approach adopted in
+this thesis.
+
+In a complete market, the Snell envelope admits the Doob--Meyer
+decomposition:
+\begin{equation}
+\label{eq:doob_meyer_american_ch2}
+\pi_t(\xi) \;=\; \pi_0(\xi)
+\;+\; \int_0^t \varphi_s \, dX_s \;-\; A_t,
+\end{equation}
+where $\varphi$ is a predictable integrand (the hedging strategy) and
+$A$ is a predictable, non-decreasing process with $A_0 = 0$.  The
+uniqueness of this decomposition is guaranteed by the Doob--Meyer theorem
+\citep{KaratzasShreve1991}: for a c\`{a}dl\`{a}g supermartingale of
+class~(D), the decomposition into a martingale and a predictable
+increasing process is unique.
+
+The process $A$ increases only on the contact set
+$\{t : \pi_t(\xi) = \xi_t\}$, that is, at times when the Snell envelope
+meets the payoff process: it reflects the cumulative cost of the early
+exercise feature.  Both $\varphi$ and $A$ are predictable: the hedger can
+anticipate the trading strategy and the associated cost one instant ahead.
+
+The predictability of $A$ is the key structural feature that distinguishes
+the complete-market decomposition from the optional decomposition that
+arises in incomplete markets.  In the notation of
+equation~\eqref{eq:optional_decomp}, the complete-market
+decomposition~\eqref{eq:doob_meyer_american_ch2} corresponds to
+$\tilde{V}_t = \pi_t(\xi)$, $\tilde{\varphi}_t = \varphi_t$, and
+$\tilde{C}_t = A_t$, with the additional property that $\tilde{C} = A$
+is predictable.  In incomplete markets
+(Theorem~\ref{thm:optional_decomp} in
+Section~\ref{subsec:optional_decomposition}), this predictability is
+lost: the cost process becomes merely adapted, reflecting the fact that
+some costs cannot be foreseen when unhedgeable risks are present.
+
+\paragraph{Free-boundary problem.}
+For the American put in the Black--Scholes model, the pricing function
+$u(t, S) = \pi_t(\xi)$ when $\xi_t = e^{-rt}(K - S_t)^+$ satisfies a
+free-boundary problem.  In the continuation region
+$\mathcal{C} := \{(t,S) : u(t,S) > (K-S)^+\}$, the pricing function
+satisfies the Black--Scholes PDE
+\begin{equation}
+\label{eq:BS_PDE}
+\frac{\partial u}{\partial t}
++ \frac{1}{2}\sigma^2 S^2
+  \frac{\partial^2 u}{\partial S^2}
++ r S \frac{\partial u}{\partial S}
+- r u \;=\; 0.
+\end{equation}
+In the exercise region
+$\mathcal{E} := \{(t,S) : u(t,S) = (K-S)^+\}$, the option is exercised
+immediately.  The boundary $S^*(t)$ separating the two regions is not
+known in advance and must be determined as part of the solution: it is
+the free boundary or optimal exercise boundary.  At the
+free boundary, the pricing function satisfies the smooth-pasting
+conditions
+\begin{equation}
+\label{eq:smooth_pasting}
+u(t, S^*(t)) = K - S^*(t),
+\qquad
+\frac{\partial u}{\partial S}(t, S^*(t)) = -1.
+\end{equation}
+
+This free-boundary problem does not admit a closed-form solution, and
+numerical methods are required.  The standard approaches include finite
+difference methods applied to the variational
+inequality~\eqref{eq:BS_PDE}, binomial and trinomial tree methods
+\citep{CoxRossRubinstein1979}, and Monte Carlo methods with regression.
+Finite difference and tree methods discretise the state space on a grid
+and solve the PDE or its discrete analogue backward in time.  These
+methods are efficient and accurate in low dimensions (one or two state
+variables) but scale poorly with the dimension of the state space: the
+number of grid points grows exponentially with dimension, rendering the
+approach impractical for the four-dimensional state space of the two-asset
+Heston model.
+
+\paragraph{Monte Carlo methods: Longstaff--Schwartz.}
+The Longstaff--Schwartz algorithm \citep{LongstaffSchwartz2001} is the
+standard Monte Carlo approach to American option pricing.  Unlike
+grid-based methods, it scales to high-dimensional problems because the
+computational cost is linear in the number of simulated paths rather than
+exponential in the dimension.  The algorithm works backward in time,
+estimating the conditional expectation of the continuation value at each
+exercise date by least-squares regression against a set of basis functions
+of the current state.
+
+At each exercise date~$t_k$, the algorithm has access to the current
+state $S_{t_k}$ and the estimated continuation value
+$\hat{C}_{t_{k+1}}$.  The regression
+\begin{equation}
+\label{eq:LS_regression}
+\hat{C}_{t_k}
+\;=\; \sum_{j=1}^{J} \beta_j \, \psi_j(S_{t_k})
+\end{equation}
+projects the future value onto a finite basis
+$\{\psi_1, \ldots, \psi_J\}$ (typically polynomials of the state
+variables), and the exercise decision is: exercise at $t_k$ if
+$\xi_{t_k} \ge \hat{C}_{t_k}$, otherwise continue.  The convergence of
+the algorithm as the number of paths and basis functions increase was
+established by \citet{TsitsiklisVanRoy2001} and
+\citet{ClementLamberton2002}.
+
+The Longstaff--Schwartz algorithm solves the optimal stopping problem but
+does not directly produce a hedging strategy.  It outputs the exercise
+boundary (or an approximation of it) and the option price, but not the
+portfolio weights that would be needed to replicate the option value.
+Extracting a hedging strategy from the Longstaff--Schwartz output
+requires a separate computation --- typically finite differences of the
+estimated continuation value function, using a ``bump and revalue''
+procedure --- which introduces an additional layer of approximation
+error that compounds with the regression error in the continuation value
+estimate.
+
+\paragraph{Comparison of hedging methodologies in complete markets.}
+It is worth pausing to compare the three approaches to hedging that have
+emerged in this section, since the same structural trade-offs reappear in
+amplified form once the market becomes incomplete.
+
+The PDE/analytical approach (delta hedging via
+equation~\eqref{eq:delta_hedge}) is exact when a closed-form pricing
+function exists and fast to evaluate, but it requires the pricing PDE to
+be solved first---either analytically or on a grid---and its
+computational cost scales exponentially with the dimension of the state
+space \citep{Glasserman2003}.  For the one-dimensional Black--Scholes
+model it is the method of choice; for the four-dimensional state space of
+the two-asset Heston model studied in Chapter~4, it is infeasible.
+
+The tree/finite-difference approach
+\citep{CoxRossRubinstein1979,Brennan1977} discretises the state space
+and solves backward in time.  It handles American exercise naturally
+through the dynamic-programming recursion and produces both prices and
+hedge ratios on the grid.  However, its cost is again exponential in
+dimension, and interpolation between grid points introduces additional
+error in the hedge ratios.
+
+The Monte Carlo/regression approach (Longstaff--Schwartz) escapes
+the curse of dimensionality for pricing---its cost is linear in the
+number of paths---but decouples the pricing and hedging steps.  The
+hedging strategy must be recovered by finite-difference ``bump and
+revalue'' applied to the estimated continuation value, a procedure that
+compounds regression error with numerical differentiation noise.
+\citet{BroadieGlasserman2004} quantify the bias introduced by the
+high/low estimator construction, and \citet{GlassermanYu2004} analyse the
+effect of basis-function choice on convergence, but neither addresses the
+hedging problem directly.
+
+A common limitation unites all three approaches: they treat pricing as
+the primary problem and extract the hedge as a derivative of the
+pricing solution---literally, a sensitivity or finite difference.  This
+indirect path means that errors in the price estimate propagate into, and
+are often amplified by, the hedging computation.  The deep hedging
+framework introduced in Section~\ref{subsec:deep_hedging} inverts this
+hierarchy, learning the hedging strategy directly from simulated
+gain/loss outcomes without requiring a pricing step as an intermediate.
+
+
+% -----------------------------------------------------------------
+\subsubsection{Structural Breakdown of Replication}
+\label{sssec:breakdown}
+
+The preceding subsections establish a clean theoretical picture: in a
+complete market, the martingale representation theorem provides the
+replicating strategy, the Doob--Meyer decomposition separates the hedging
+gains from a predictable cost process, and the cost process~$\tilde{C}$
+vanishes identically.  The purpose of this final subsection is to
+catalogue the specific ways in which this picture breaks down in
+practice, thereby motivating the move to incomplete markets in
+Section~\ref{subsec:incomplete_markets}.
+
+\paragraph{Dimensional mismatch.}
+The predictable representation property~\eqref{eq:PRP} requires that
+the market filtration be generated by the same Brownian motions that
+drive the traded assets.  When the model includes $m > d$ independent
+Brownian motions but only $d$ traded assets, the filtration contains
+information generated by the $m - d$ ``extra'' Brownian motions, and
+the representation fails.  Concretely, there exist
+$\mathbb{Q}$-martingales that cannot be written as stochastic integrals
+with respect to the price process~$X$.  These unrepresentable martingales
+correspond to risks that no trading strategy can hedge.
+
+In the multi-factor GBM model considered in this thesis, the two-asset
+price dynamics are driven by $m = 3$ (or more) independent Brownian
+motions.  The volatility matrix $\Sigma$ is $2 \times 3$ and has a
+non-trivial null space.  Risks associated with the Brownian motion in this
+null space are unhedgeable, and the cost process~$\tilde{C}$ accumulates
+whenever these risks affect the option value.
+
+\paragraph{Non-traded risk factors.}
+Even when the number of Brownian motions equals the number of traded
+assets, the market is incomplete if some risk factors evolve
+stochastically but are not themselves tradable.  The canonical example is
+the Heston stochastic volatility model \citep{Heston1993}, where the
+instantaneous variance of the asset price follows a mean-reverting
+diffusion.  The variance process generates a source of randomness that
+affects option values --- through the dependence of continuation values on
+current and future volatility --- but cannot be hedged because variance is
+not a traded instrument.
+
+The mathematical mechanism is as follows.  In the Heston model, the
+filtration is generated by two Brownian motions (one driving the asset
+price, one driving the variance), but only one instrument is traded.  The
+Girsanov theorem requires a two-dimensional market price of risk
+$(\gamma^S, \gamma^v)$ but provides only one equation (the drift
+condition on the traded asset), leaving $\gamma^v$ --- the variance risk
+premium --- as a free parameter.  The drift restriction pins down the
+price-risk premium~$\gamma^S$, while the variance-risk
+premium~$\gamma^v$ remains underdetermined, producing a family of ELMMs.
+Each admissible choice of $\gamma^v$
+defines a different element of~$\mathcal{M}(X)$, and the resulting
+non-uniqueness is the mathematical signature of the untraded variance
+risk.
+
+\paragraph{Other sources of incompleteness.}
+Two additional mechanisms are noted for completeness, though they are not
+the primary focus of this thesis.  Jump processes
+\citep{Merton1976} introduce discontinuities in asset prices that cannot
+be replicated by continuous trading, even if the number of Brownian
+motions and traded assets match.  Transaction costs
+\citep{LelandReplication1985} prevent the continuous rebalancing assumed
+by the theory: in the presence of proportional costs, the
+self-financing condition is violated at each trade, and perfect
+replication is impossible regardless of the model's dimensional structure.
+
+% -----------------------------------------------------------------
+\subsubsection{Gap Identification}
+\label{sssec:gap_identification}
+
+The classical theory developed in this section handles the case of
+complete markets, where the equivalent local martingale measure is unique,
+every contingent claim is replicable, and the computational workflow
+proceeds in two sequential stages: first solve for the price (via a PDE,
+a tree, or a Monte Carlo estimator), then differentiate to obtain the
+hedge.  The cost process~$\tilde{C}$ in the optional decomposition
+vanishes identically, and the hedging problem reduces to computing a
+single sensitivity.
+
+In incomplete markets the situation is fundamentally different.  The set
+$\mathcal{M}(X)$ contains more than one element; the Doob--Meyer
+decomposition is replaced by the optional decomposition, in which the
+cost process~$\tilde{C}$ is strictly positive and merely adapted rather
+than predictable; and the relevant value process is no longer the Snell
+envelope under a single measure but the minimal dominating wealth process,
+defined by a nested supremum over both measures and stopping times.  No
+closed-form expressions exist for either the predictable
+integrand~$\tilde{\varphi}$ or the cost process~$\tilde{C}$ in this
+setting.  Existing numerical methods primarily approximate value functions
+under a fixed modelling choice --- often a single measure selected from
+$\mathcal{M}(X)$ --- and then differentiate to recover hedges; they do
+not directly approximate the pair
+$(\tilde{\varphi}, \tilde{C})$ associated with the minimal dominating
+wealth process under non-unique martingale measures in high dimension.
+Each classical method either targets the price rather than the hedge, or
+is restricted to state spaces of dimension one or two, or both.
+
+This thesis addresses the gap by learning $\tilde{\varphi}$
+and~$\tilde{C}$ jointly from simulated paths using deep neural networks,
+without requiring a prior pricing step and without discretising the state
+space on a grid.  The theoretical foundations for the incomplete-market
+objects that the network must approximate --- the non-singleton set
+$\mathcal{M}(X)$, the minimal dominating wealth process, the optional
+decomposition theorem, and the interpretation of~$\tilde{C}$ as the
+unhedgeable residual cost --- are developed in the next section.
 % To be written
 
 \subsection{Incomplete Markets and Super-Hedging}
