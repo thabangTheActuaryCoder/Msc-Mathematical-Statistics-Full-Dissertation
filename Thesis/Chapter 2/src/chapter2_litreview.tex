@@ -4,22 +4,13 @@
 \section{Literature Review}
 \label{sec:literature_review}
 
-This chapter surveys the mathematical and computational foundations on
-which the thesis rests.  The exposition follows the logical structure of
-the hedging problem itself: from the classical theory of replication in
-complete markets, through the challenges introduced by market
-incompleteness, to the representation theorems that characterise the
-minimal dominating wealth process, and finally to the deep learning
-architectures that provide computable approximations.  Each section
-introduces the economic motivation before the formal mathematics, and
-distinguishes clearly between existence results --- theorems guaranteeing
-that certain objects exist --- and constructive procedures --- algorithms
-that compute or approximate them.
+This chapter surveys the mathematical and computational foundations on which the thesis rests. The exposition follows the logical structure of the hedging problem itself, beginning with the classical theory of replication in complete markets, then addressing the challenges introduced by market incompleteness, followed by the representation theorems that characterise the minimal dominating wealth process, and finally turning to the deep learning architectures that provide computable approximations. Each section introduces the economic motivation before presenting the formal mathematics and clearly distinguishes between existence results, which are theorems guaranteeing that certain objects exist, and constructive procedures, which are algorithms that compute or approximate them.
+
 
 The literature reviewed here spans several fields: mathematical finance,
 stochastic analysis, risk management, and machine learning.  In each
 case, the focus is on the specific results and methods that are directly
-relevant to the problem formulated in Chapter~1: approximating the
+relevant to the problem formulated in Chapter \ref{sec:introduction}: approximating the
 predictable integrand~$\tilde{\varphi}$ and the adapted cost
 process~$\tilde{C}$ in the optional decomposition of the minimal
 dominating wealth process for American options under non-unique martingale
@@ -46,10 +37,10 @@ out.  Third, the fundamental theorems of asset pricing connect
 no-arbitrage to the existence and uniqueness of pricing measures.  Fourth,
 the martingale representation theorem is developed as the mathematical
 mechanism by which measure uniqueness translates into the existence of
-replicating strategies --- this is the step that ensures the cost
+replicating strategies,this is the step that ensures the cost
 process~$\tilde{C}$ vanishes identically.  Fifth, the replication of both
 European and American claims is treated, with particular attention to the
-Snell envelope and the Doob--Meyer decomposition.  Sixth, the structural
+Snell envelope and the Doob-Meyer decomposition.  Sixth, the structural
 reasons why the replication framework breaks down in practice are
 catalogued, motivating the transition to incomplete markets in
 Section~\ref{subsec:incomplete_markets}.
@@ -59,10 +50,8 @@ Section~\ref{subsec:incomplete_markets}.
 \subsubsection{Economic Motivation and Arbitrage Pricing}
 \label{sssec:arbitrage_pricing}
 
-Consider a financial market in which a derivative security --- say a
-European call option --- is available for trade alongside the underlying
-asset and a risk-free bond.  The derivative pays a known function of the
-asset price at maturity, and the question is: what is its fair price today?
+Consider a financial market in which a derivative security, for example a European call option, is available for trade alongside the underlying asset and a risk-free bond. The derivative pays a known function of the asset price at maturity. The question is therefore: what is its fair price today?
+
 
 One approach is to model investor preferences, estimate the probability
 distribution of future asset prices, and compute the expected discounted
@@ -84,9 +73,8 @@ buy the replicating portfolio, and pocket the difference at time zero; at
 maturity, the portfolio's payoff would exactly cover the derivative
 obligation, leaving a risk-free profit.  If the derivative were priced
 below the replicating portfolio, the reverse trade would yield the same
-result.  In either case, a risk-free profit emerges from zero initial
-investment --- an arbitrage.  Ruling out arbitrage forces the derivative
-price to equal the replication cost.
+result.In either case, a risk-free profit emerges from zero initial investment, which constitutes an arbitrage opportunity. Ruling out arbitrage forces the derivative price to equal the replication cost.
+
 
 Three conditions are needed for this argument to work.  First, the market
 must admit continuous trading in the underlying asset and the bond, so
@@ -105,11 +93,8 @@ price is independent of investor preferences because the replication
 argument does not involve preferences: it is a logical consequence of the
 absence of arbitrage.
 
-The mathematical challenge is to formalise these ideas --- to define
-precisely what ``replication'' and ``arbitrage'' mean in continuous time,
-and to characterise the class of markets in which completeness holds.
-This requires the probabilistic framework developed in the next
-subsection.
+The mathematical challenge is to formalise these ideas by defining precisely what “replication” and “arbitrage” mean in continuous time and by characterising the class of markets in which completeness holds. This requires the probabilistic framework developed in the next subsection.
+
 
 
 % -----------------------------------------------------------------
