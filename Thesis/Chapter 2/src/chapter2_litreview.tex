@@ -139,23 +139,15 @@ semimartingale is a process that admits the canonical decomposition
 \label{eq:semimartingale_decomp}
 X_t \;=\; X_0 \;+\; M_t \;+\; A_t,
 \end{equation}
-where $M$ is a local martingale (a process with no systematic drift, when
-viewed locally) and $A$ is a process of locally finite variation (a
-process whose paths have finite total variation on every compact interval,
-almost surely).  The decomposition separates the unpredictable
-fluctuations of the price ($M$) from its systematic tendency ($A$).
-Economically, the local martingale component captures the ``noise'' in
-price movements --- the part that cannot be predicted from past
-information --- while the finite variation component captures the
-``signal'' --- the part that reflects expected returns, risk premia, or
-other systematic factors.
+where (M) is a local martingale (a process with no systematic drift when viewed locally) and (A) is a process of locally finite variation (a process whose paths have finite total variation on every compact interval, almost surely). The decomposition separates the unpredictable fluctuations of the price (M) from its systematic tendency (A). Economically, the local martingale component captures the “noise” in price movements, namely the part that cannot be predicted from past information, while the finite variation component captures the “signal,” which reflects expected returns, risk premia, or other systematic factors.
+
 
 The importance of the semimartingale assumption extends beyond technical
 convenience.  \citet{DelbaenSchachermayer1994} proved that the
 semimartingale property is implied by the absence of arbitrage: if
 discounted prices are not semimartingales, then arbitrage opportunities
 necessarily exist.  In other words, the semimartingale framework is not an
-arbitrary mathematical choice --- it is the largest class of processes
+arbitrary mathematical choice, it is the largest class of processes
 that is compatible with economic equilibrium.
 
 A trading strategy is a predictable, $X$-integrable process
@@ -164,7 +156,7 @@ units of each risky asset held at each time.  Predictability means that
 $\varphi_t$ is $\mathcal{F}_{t^-}$-measurable: the portfolio position at
 time~$t$ is determined using only information available strictly
 before~$t$.  This is not a mathematical convenience but an economic
-necessity --- the hedger must decide how many shares to hold before
+necessity: the hedger must decide how many shares to hold before
 observing the next price movement.  Any strategy that could ``see'' the
 current price increment before committing to a position would violate the
 information structure of the market and correspond to insider trading
@@ -1034,10 +1026,335 @@ decomposition theorem, and the interpretation of~$\tilde{C}$ as the
 unhedgeable residual cost --- are developed in the next section.
 % To be written
 
+% =========================================================================
+% 2.2  INCOMPLETE MARKETS AND SUPER-HEDGING
+% =========================================================================
 \subsection{Incomplete Markets and Super-Hedging}
 \label{subsec:incomplete_markets}
 
-% To be written
+Section~\ref{subsec:complete_markets} established that the completeness of
+a market is equivalent to $|\mathcal{M}(X)| = 1$ and that completeness
+fails in the thesis models through a dimensional mismatch (multi-factor
+GBM) and an untraded risk factor (Heston).  This section develops the
+pricing and hedging theory that applies when $|\mathcal{M}(X)| > 1$.
+The exposition proceeds in five stages: the no-arbitrage price interval
+that replaces the unique price, the super-hedging duality for European
+claims, its extension to American claims, the minimal dominating wealth
+process, and the economic and computational limitations that motivate the
+optional decomposition and risk-measure frameworks of subsequent sections.
+
+
+% -----------------------------------------------------------------
+\subsubsection{The No-Arbitrage Price Interval}
+\label{sssec:price_interval}
+
+When $|\mathcal{M}(X)| > 1$, different measures assign different prices to
+the same non-replicable claim.  Each price is individually consistent with
+no-arbitrage---all measures in~$\mathcal{M}(X)$ agree on the values of
+traded assets---but they disagree on claims that depend on risks not
+spanned by the tradeable instruments.  The disagreement reflects a genuine
+economic indeterminacy: when a claim depends on unhedgeable risk, its
+price depends on the compensation the market demands for bearing that
+risk, and arbitrage arguments constrain this compensation to a set of
+admissible values rather than pinning it to a single number.
+
+For a European claim with non-negative discounted payoff $H$ satisfying
+$\sup_{\mathbb{Q} \in \mathcal{M}(X)}
+\mathbb{E}^{\mathbb{Q}}[H] < \infty$, the no-arbitrage price interval is
+\begin{equation}
+\label{eq:price_interval}
+\bigl[\,\underline{\pi}(H),\;\overline{\pi}(H)\,\bigr]
+\;:=\;
+\Bigl[\,
+  \inf_{\mathbb{Q} \in \mathcal{M}(X)}
+    \mathbb{E}^{\mathbb{Q}}[H],\;
+  \sup_{\mathbb{Q} \in \mathcal{M}(X)}
+    \mathbb{E}^{\mathbb{Q}}[H]
+\,\Bigr].
+\end{equation}
+Every price in this interval is consistent with the absence of
+arbitrage; every price outside creates an arbitrage opportunity.  The
+result was established for general semimartingale models by
+\citet{ElKarouiQuenez1995}.  The lower bound~$\underline{\pi}(H)$ is
+the sub-hedging price: the maximum amount a buyer would pay while
+insisting on a non-negative residual.  The upper
+bound~$\overline{\pi}(H)$ is the super-hedging price: the minimum
+initial capital that allows the seller to dominate~$H$ almost surely.
+The width of the interval quantifies the degree of incompleteness as
+experienced by the specific claim~$H$.
+
+Within the interval, the actual transaction price is determined by factors
+outside the scope of no-arbitrage theory: supply and demand, risk
+preferences, and equilibrium considerations.  The interval is a structural
+consequence of incompleteness, not of model uncertainty or estimation
+error: it persists even when the model is known with certainty.  For the
+American options studied in this thesis, the interval is typically wide
+because exercise-timing optionality amplifies the effect of measure
+ambiguity.
+
+
+% -----------------------------------------------------------------
+\subsubsection{Super-Hedging for European Claims}
+\label{sssec:super_hedging_european}
+
+The super-hedging price is the minimum initial capital required to
+dominate the claim with certainty.
+
+\begin{definition}[Super-hedging price, European claim]
+\label{def:super_hedge_price_european}
+For a European claim with non-negative discounted payoff $H \in
+L^0_+(\mathcal{F}_T)$, the super-hedging price is
+\begin{equation}
+\label{eq:super_hedge_price}
+\overline{\pi}(H)
+\;:=\; \inf\bigl\{\,v \ge 0 :
+\exists\;\text{admissible } \varphi \text{ such that }
+v + G_T(\varphi) \ge H\;\;
+\mathbb{P}\text{-a.s.}\,\bigr\},
+\end{equation}
+where admissibility requires $v + G_t(\varphi) \ge 0$ for all
+$t \in [0,T]$.
+\end{definition}
+
+\begin{theorem}[Super-hedging duality, European claims
+{\citep{ElKarouiQuenez1995}}]
+\label{thm:super_hedge_european}
+Let $X$ be a locally bounded semimartingale satisfying NFLVR, and let
+$H \in L^0_+(\mathcal{F}_T)$ satisfy $\overline{\pi}(H) < \infty$.
+Then
+\begin{equation}
+\label{eq:super_hedge_duality}
+\overline{\pi}(H)
+\;=\;
+\sup_{\mathbb{Q} \in \mathcal{M}(X)}
+  \mathbb{E}^{\mathbb{Q}}[H].
+\end{equation}
+Moreover, the infimum in~\eqref{eq:super_hedge_price} is attained:
+there exists an admissible strategy~$\varphi^*$ such that
+$\overline{\pi}(H) + G_T(\varphi^*) \ge H$ $\mathbb{P}$-a.s.
+\end{theorem}
+
+The theorem establishes a duality between a control problem (minimise
+initial capital over strategies that dominate~$H$) and an optimisation
+over probability measures (maximise the claim's expectation
+over~$\mathcal{M}(X)$).  The proof relies on a Hahn--Banach separation
+argument in~$L^\infty$: the set of payoffs dominated by admissible
+strategies is convex and closed, and the super-hedging price is its
+support function evaluated at~$H$.
+
+The attainment assertion is equally important: it guarantees that
+$\overline{\pi}(H)$ is realised by an explicit strategy, not merely a
+theoretical infimum.  The resulting wealth process
+$V^*_t := \overline{\pi}(H) + \int_0^t \varphi^*_s \cdot dX_s$
+is a $\mathbb{Q}$-supermartingale for every
+$\mathbb{Q} \in \mathcal{M}(X)$: the stochastic integral is a
+$\mathbb{Q}$-local martingale, and the non-negativity constraint promotes
+it to a supermartingale.  This simultaneous supermartingale property under
+all measures in~$\mathcal{M}(X)$ provides the entry point for the
+optional decomposition theorem
+(Section~\ref{subsec:optional_decomposition}).
+
+In a complete market, the supremum in~\eqref{eq:super_hedge_duality}
+reduces to the single expectation $\mathbb{E}^{\mathbb{Q}}[H]$, the
+domination holds with equality, and super-hedging coincides with
+replication.
+
+
+% -----------------------------------------------------------------
+\subsubsection{American Claims and the Universal Snell Envelope}
+\label{sssec:american_incomplete}
+
+For American claims, the seller must guarantee domination not at a single
+terminal date but at every possible exercise time.  The buyer's exercise
+strategy may itself depend on the prevailing measure, creating a doubly
+adversarial structure.
+
+\begin{definition}[Super-hedging price, American claim]
+\label{def:super_hedge_price_american}
+For an American claim with non-negative, c\`{a}dl\`{a}g, adapted,
+discounted reward process $\xi = (\xi_t)_{t \in [0,T]}$, the
+super-hedging price is
+\begin{equation}
+\label{eq:super_hedge_american}
+\overline{\pi}(\xi)
+\;:=\; \inf\bigl\{\,v \ge 0 :
+\exists\;\text{admissible } \varphi \text{ such that }
+v + G_t(\varphi) \ge \xi_t \;\;\forall\, t \in [0,T],\;\;
+\mathbb{P}\text{-a.s.}\,\bigr\}.
+\end{equation}
+\end{definition}
+
+The path-wise domination constraint $v + G_t(\varphi) \ge \xi_t$ for
+all~$t$ is strictly stronger than the European terminal condition: the
+seller must maintain sufficient wealth to cover the option if the holder
+exercises at any time.
+
+The duality extends to this setting through a nested optimisation.
+Recall from Section~\ref{sssec:replication_claims} that, under a fixed
+$\mathbb{Q} \in \mathcal{M}(X)$, the Snell envelope
+$U^{\mathbb{Q}}_t(\xi) := \esssup_{\tau \in \mathcal{T}_{[t,T]}}
+\mathbb{E}^{\mathbb{Q}}[\xi_\tau \mid \mathcal{F}_t]$ is the smallest
+$\mathbb{Q}$-supermartingale dominating~$\xi$.  Different measures
+produce different Snell envelopes, and these need not be ordered:
+$U^{\mathbb{Q}_1}_t(\xi)$ and $U^{\mathbb{Q}_2}_t(\xi)$ may cross.
+
+\begin{theorem}[Super-hedging duality, American claims]
+\label{thm:super_hedge_american}
+Under the conditions of Theorem~\ref{thm:super_hedge_european}, let
+$\xi$ be a non-negative, c\`{a}dl\`{a}g, adapted process with
+$\sup_{\mathbb{Q} \in \mathcal{M}(X)}
+\mathbb{E}^{\mathbb{Q}}[\sup_{t \le T} \xi_t] < \infty$.  Then
+\begin{equation}
+\label{eq:super_hedge_american_duality}
+\overline{\pi}(\xi)
+\;=\;
+\sup_{\mathbb{Q} \in \mathcal{M}(X)}
+\sup_{\tau \in \mathcal{T}_{[0,T]}}
+  \mathbb{E}^{\mathbb{Q}}[\xi_\tau]
+\;=\;
+\sup_{\mathbb{Q} \in \mathcal{M}(X)}
+  U^{\mathbb{Q}}_0(\xi),
+\end{equation}
+and the infimum in~\eqref{eq:super_hedge_american} is attained.
+\end{theorem}
+
+The result synthesises the contributions of \citet{ElKarouiQuenez1995},
+who developed the super-hedging theory for American claims in a
+semimartingale framework, and \citet{Kramkov1996}, whose optional
+decomposition theorem provides the structural decomposition of the
+resulting wealth process.  The two suprema can be interchanged because
+the set of measures is convex and weakly compact and the mapping
+$\mathbb{Q} \mapsto \mathbb{E}^{\mathbb{Q}}[\xi_\tau]$ is linear
+in~$\mathbb{Q}$ for fixed~$\tau$.
+
+Financially, the seller faces a doubly adversarial problem: nature selects
+the worst-case pricing measure, and the buyer selects the worst-case
+exercise time.  The super-hedging price is the cost of surviving both
+adversaries simultaneously, making it model-robust within the
+class~$\mathcal{M}(X)$.
+
+
+% -----------------------------------------------------------------
+\subsubsection{The Minimal Dominating Wealth Process}
+\label{sssec:minimal_dominating}
+
+The super-hedging theorem establishes the initial capital
+$\overline{\pi}(\xi)$ and guarantees an optimal strategy.  The minimal
+dominating wealth process extends this to a dynamic object: the cheapest
+wealth process that dominates the reward at every time.
+
+\begin{definition}[Minimal dominating wealth process]
+\label{def:minimal_dominating}
+Let $\xi = (\xi_t)_{t \in [0,T]}$ be a non-negative, c\`{a}dl\`{a}g,
+adapted process satisfying the integrability condition of
+Theorem~\ref{thm:super_hedge_american}.  The minimal dominating
+wealth process is
+\begin{equation}
+\label{eq:tilde_V_def}
+\tilde{V}_t
+\;:=\;
+\essinf\bigl\{\,V_t :
+V \text{ is an admissible wealth process with }
+V_s \ge \xi_s \;\;\forall\, s \in [t,T],\;\;
+\mathbb{P}\text{-a.s.}\,\bigr\}.
+\end{equation}
+Equivalently,
+\begin{equation}
+\label{eq:tilde_V_dual}
+\tilde{V}_t
+\;=\;
+\sup_{\mathbb{Q} \in \mathcal{M}(X)}
+  U^{\mathbb{Q}}_t(\xi)
+\;=\;
+\sup_{\mathbb{Q} \in \mathcal{M}(X)}
+\esssup_{\tau \in \mathcal{T}_{[t,T]}}
+  \mathbb{E}^{\mathbb{Q}}[\xi_\tau \mid \mathcal{F}_t].
+\end{equation}
+\end{definition}
+
+The primal definition~\eqref{eq:tilde_V_def} characterises
+$\tilde{V}_t$ as the minimal wealth at time~$t$ among all wealth
+processes that dominate~$\xi$ from~$t$ onward.  The dual
+characterisation~\eqref{eq:tilde_V_dual} computes it as the worst-case
+Snell envelope at each time~$t$, the envelope being taken under every
+measure in~$\mathcal{M}(X)$.  The equivalence follows from applying the
+super-hedging duality conditionally.
+
+Three structural properties are central to the thesis.  First,
+$\tilde{V}$ is a $\mathbb{Q}$-supermartingale for every
+$\mathbb{Q} \in \mathcal{M}(X)$---a process with this property is called
+an $\mathcal{M}(X)$-supermartingale.  Second, $\tilde{V}_t \ge \xi_t$
+for all~$t$, which is immediate from the primal definition.  Third,
+$\tilde{V}$ is minimal: any admissible wealth process that is an
+$\mathcal{M}(X)$-supermartingale and dominates~$\xi$ also
+dominates~$\tilde{V}$.
+
+These three properties---simultaneous supermartingale, domination, and
+minimality---uniquely characterise $\tilde{V}$ and are exactly the
+hypotheses required by the optional decomposition theorem
+(Section~\ref{subsec:optional_decomposition}), which decomposes
+$\tilde{V}$ into a gains-from-trade integral and an adapted cost process.
+It is worth emphasising that in a complete market
+$\tilde{V}$ reduces to the Snell envelope under the unique measure, and
+the optional decomposition reduces to the Doob--Meyer decomposition of
+Section~\ref{sssec:replication_claims}.  The theory developed here is
+therefore a strict generalisation.
+
+
+% -----------------------------------------------------------------
+\subsubsection{Limitations of Super-Hedging}
+\label{sssec:super_hedging_limitations}
+
+Super-hedging is theoretically complete but rarely implemented.  The
+reasons are economic and computational, and understanding them motivates
+the two directions in which the thesis extends the framework.
+
+\paragraph{Economic cost.}
+The super-hedging price hedges against the worst-case measure, which may
+assign large probabilities to scenarios that are extremely unlikely
+under~$\mathbb{P}$.  For options in the Heston model, where
+$\mathcal{M}(X)$ includes measures with arbitrarily high or low long-run
+variance levels (subject only to integrability constraints), the
+super-hedging price can exceed the at-the-money option price by a factor
+of two or more for moderate maturities.  A seller who charges this price
+would be uncompetitive: almost-sure domination is unnecessarily strong
+when controlled shortfall probability is acceptable.  The transition from
+almost-sure domination to expected-loss or quantile-based criteria is
+formalised in Section~\ref{subsec:risk_measures}.
+
+\paragraph{Computational intractability.}
+The dual representation~\eqref{eq:super_hedge_american_duality} requires
+optimisation over~$\mathcal{M}(X)$, and the primal
+formulation~\eqref{eq:super_hedge_american} requires optimisation over
+admissible strategies.  Neither admits a closed-form solution in the
+thesis models.
+
+For the multi-factor GBM model, $\mathcal{M}(X)$ is parametrised by a
+finite-dimensional vector (the projection of the market price of risk onto
+$\ker(\Sigma)$, as shown in Section~\ref{sssec:breakdown}), so the outer
+optimisation is finite-dimensional.  However, the inner Snell-envelope
+computation must itself be solved numerically, and the outer search is
+performed over this noisy inner estimate, producing a nested Monte Carlo
+problem that is expensive and statistically fragile.
+
+For the Heston model, $\mathcal{M}(X)$ is
+infinite-dimensional---parametrised by an adapted process~$\gamma^v$
+rather than a fixed vector---and the outer optimisation becomes a
+variational problem over adapted processes for which no tractable
+algorithms exist in full generality.  Practical implementations restrict
+to parametric subfamilies of measures, computing only a lower bound on the
+true super-hedging price.
+
+\paragraph{Absence of residual analysis.}
+The super-hedging framework provides no decomposition of the wealth
+process into hedgeable and unhedgeable components.  The terminal surplus
+$V^*_T - H$ (European) or running surplus $V^*_t - \xi_t$ (American) is
+non-negative by construction, but its distribution, sensitivity to
+parameters, and temporal evolution are not characterised.  The optional
+decomposition (Section~\ref{subsec:optional_decomposition}) fills this gap
+by separating gains from trade and the cumulative cost of unhedgeable
+risk, providing the structural accounting that the neural network
+architecture of Section~\ref{subsec:deep_hedging} must reproduce.
 
 \subsection{Optional Decomposition of Supermartingales}
 \label{subsec:optional_decomposition}

@@ -8,9 +8,11 @@
 \section*{Chapter 1}
 \section{Introduction}
 \label{sec:introduction}
+
 % =========================================================================
 % 1.1  HEDGING UNDER NON-UNIQUENESS OF MARTINGALE MEASURES
 % =========================================================================
+
 \subsection{Hedging Under Non-Uniqueness of Martingale Measures}
 \label{subsec:hedging_motivation}
 
@@ -489,7 +491,8 @@ approximation parameterised by network weights.  The loss function is
 \;+\; \lambda_c \, \operatorname{CVaR}_\alpha\!\bigl(\max(\xi_\tau
       - V_T^\theta,\, 0)\bigr),
 \end{equation}
-where $\operatorname{CVaR}_\alpha$ denotes conditional value-at-risk at
+where $\operatorname{CVaR}_\alpha$
+denotes conditional value-at-risk at
 level~$\alpha$ \citep{RockafellarUryasev2000}.  
 
 The three terms encode distinct financial objectives.The first term, weighted by~$\lambda_s$, penalises shortfall: scenarios in which the portfolio fails to cover the option obligation.  Financially, this is a solvency constraint.  A shortfall $\xi_\tau > V_T^\theta$ means the hedger cannot meet the liability, which constitutes a default event. The second term, weighted by~$\lambda_o$, penalises over-hedging: scenarios in which the portfolio exceeds the obligation.  Financially,
